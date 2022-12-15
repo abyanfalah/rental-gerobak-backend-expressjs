@@ -39,7 +39,7 @@ module.exports = {
 	createCustomer: async (req, res) => {
 		customerModel
 			.create(req.body)
-			.then(() => res.send({ message: "user created" }))
+			.then(() => res.send({ message: "customer created" }))
 			.catch((err) => res.status(500).send(err));
 	},
 
@@ -52,7 +52,6 @@ module.exports = {
 			}
 
 			req.body.id = customerId;
-			req.body.password = sha1(req.body.password);
 
 			if (isIdenticalObject(req.body, foundCustomer)) {
 				return res
@@ -62,7 +61,7 @@ module.exports = {
 
 			customerModel
 				.update(req.body)
-				.then(() => res.send({ message: "user updated" }))
+				.then(() => res.send({ message: "customer updated" }))
 				.catch((err) => res.send(err));
 		} catch (e) {
 			console.log(e);
@@ -78,7 +77,7 @@ module.exports = {
 			}
 			customerModel
 				.delete(foundCustomer.id)
-				.then(() => res.send({ message: "user deleted" }))
+				.then(() => res.send({ message: "customer deleted" }))
 				.catch((err) => res.send(err));
 		} catch (e) {
 			console.log(e);
