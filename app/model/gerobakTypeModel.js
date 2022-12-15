@@ -53,13 +53,12 @@ module.exports = {
 
 	update: (newData) => {
 		newData.updated_at = sqlDate(Date.now());
+		console.log(newData);
 		return new Promise((resolve, reject) => {
-			const a = db.query(query.UPDATE, [newData, newData.id], (err) => {
+			db.query(query.UPDATE, [newData, newData.id], (err) => {
 				if (err) return reject(err);
 				return resolve();
 			});
-
-			console.log(a);
 		});
 	},
 

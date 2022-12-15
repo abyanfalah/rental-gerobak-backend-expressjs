@@ -59,10 +59,10 @@ module.exports = {
 				return res.send({ message: "same data, no changes were made" });
 			}
 
+			req.body.id = GerobakId;
 			gerobakTypeModel
 				.update(req.body)
-				// .then(() => res.send({ message: "gerobak type updated" }))
-				.then(() => res.send({ message: foundGerobakType, body: req.body }))
+				.then(() => res.send({ message: "gerobak type updated" }))
 				.catch((err) => res.send(err));
 		} catch (e) {
 			console.log(e);
