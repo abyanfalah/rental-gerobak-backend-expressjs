@@ -41,10 +41,6 @@ module.exports = {
 	},
 
 	create: (newData) => {
-		const today = sqlDate(Date.now());
-		newData.created_at = today;
-		newData.updated_at = today;
-
 		return new Promise((resolve, reject) => {
 			db.query(query.INSERT, newData, (err) => {
 				if (err) return reject(err);

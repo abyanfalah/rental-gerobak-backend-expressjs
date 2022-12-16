@@ -5,8 +5,8 @@ const sqlDate = require(`js-date-to-sql-datetime`);
 const tableName = "rent_detail";
 
 const query = {
-	SELECT_ALL: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC LIMIT ? OFFSET ?`,
-	SELECT_BY_ID: `SELECT * FROM ${tableName} WHERE id = ? LIMIT 1`,
+	// SELECT_ALL: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC LIMIT ? OFFSET ?`,
+	SELECT_BY_RENT_ID: `SELECT * FROM ${tableName} WHERE rent_id = ?`,
 
 	INSERT: `INSERT INTO ${tableName} SET ?`,
 	UPDATE: `UPDATE ${tableName} SET ? WHERE id = ?`,
@@ -14,34 +14,29 @@ const query = {
 };
 
 module.exports = {
-	getAll: (limit, offset) => {
-		return new Promise((resolve, reject) => {
-			db.query(
-				query.SELECT_ALL,
-				[parseInt(limit), parseInt(offset)],
-				(err, result) => {
-					if (err) return reject(err);
-					return resolve(result);
-				}
-			);
-		});
-	},
+	// getAll: (limit, offset) => {
+	// 	return new Promise((resolve, reject) => {
+	// 		db.query(
+	// 			query.SELECT_ALL,
+	// 			[parseInt(limit), parseInt(offset)],
+	// 			(err, result) => {
+	// 				if (err) return reject(err);
+	// 				return resolve(result);
+	// 			}
+	// 		);
+	// 	});
+	// },
 
-	getById: (id) => {
+	getByRentId: (id) => {
 		return new Promise((resolve, reject) => {
-			db.query(query.SELECT_BY_ID, id, (err, result) => {
+			db.query(query.SELECT_BY_RENT_ID, id, (err, result) => {
 				if (err) return reject(err);
-				return resolve(result[0]);
+				return resolve(result);
 			});
 		});
 	},
 
 	create: (newData) => {
-		newData.id = uuid.v4();
-		const today = sqlDate(Date.now());
-		newData.created_at = today;
-		newData.updated_at = today;
-
 		return new Promise((resolve, reject) => {
 			db.query(query.INSERT, newData, (err) => {
 				if (err) {

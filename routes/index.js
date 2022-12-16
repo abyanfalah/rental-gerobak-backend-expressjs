@@ -16,6 +16,8 @@ router.get("/session", (req, res) => {
 
 router.get("/reset", (req, res) => {
 	db.query("update gerobak set status = 'ADA'");
+	// db.query("truncate rent_detail");
+	db.query("truncate rent");
 	res.send({ message: "OK" });
 });
 module.exports = router;

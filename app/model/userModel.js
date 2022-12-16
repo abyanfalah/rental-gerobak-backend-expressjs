@@ -42,9 +42,6 @@ module.exports = {
 	create: (newData) => {
 		newData.id = uuid.v4();
 		newData.password = sha1(newData.password);
-		const today = sqlDate(Date.now());
-		newData.created_at = today;
-		newData.updated_at = today;
 
 		return new Promise((resolve, reject) => {
 			db.query(query.INSERT, newData, (err) => {

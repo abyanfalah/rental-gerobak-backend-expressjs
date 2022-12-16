@@ -2,6 +2,7 @@ const db = require(`../../database`).db;
 const uuid = require(`uuid`);
 const sqlDate = require(`js-date-to-sql-datetime`);
 const gerobakModel = require("./gerobakModel");
+const rentDetailModel = require("./rentDetailModel");
 
 const tableName = "rent";
 
@@ -38,7 +39,7 @@ module.exports = {
 	},
 
 	create: async (newData) => {
-		return new Promise((resolve, reject) => {
+		return new Promise(async (resolve, reject) => {
 			try {
 				const today = sqlDate(Date.now());
 				const rentData = {
@@ -48,17 +49,24 @@ module.exports = {
 					customer_id: newData.customer_id,
 				};
 
-				const rentedGerobakList = newData.gerobak_list;
+				const rentedGerobakIdList = newData.gerobak_list;
+				let rentDetail = {
+					rent_id: rentData.id,
+					start_time: today,
+					created_at: today,
+				};
 
 				db.beginTransaction();
 				db.query(query.INSERT, rentData);
-				for (let id of rentedGerobakList) {
+				for (let id of rentedGerobakIdList) {
 					gerobakModel.updateStatus("DISEWA", id);
+					rentDetail.gerobak_id = id;
+					rentDetail.sub_amount = await gerobakModel.getGerobakCharge(id);
+					rentDetailModel.create(rentDetail);
 				}
 				db.commit();
 				resolve(true);
 			} catch (e) {
-				console.log("entah apa yang salah	===>:", e);
 				return reject(e);
 			}
 		});
