@@ -96,6 +96,12 @@ module.exports = {
 					console.log(err);
 					return reject(err);
 				}
+
+				// if (result.length < 1) {
+				// 	console.log("no type with");
+				// 	return reject();
+				// }
+
 				return resolve(result[0].next_code);
 			});
 		});

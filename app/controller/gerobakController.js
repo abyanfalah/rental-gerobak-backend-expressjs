@@ -1,5 +1,6 @@
 const gerobakModel = require("../model/gerobakModel");
 const isIdenticalObject = require("../../helper/is-identical-object");
+const gerobakTypeModel = require("../model/gerobakTypeModel");
 
 module.exports = {
 	listGerobak: async (req, res) => {
@@ -35,6 +36,10 @@ module.exports = {
 
 	createGerobak: async (req, res) => {
 		try {
+			const foundGerobakType = await gerobakTypeModel.getById(req.body.type_id);
+			if (!foundGerobakType || foundGerobakType.deleted_at != null)
+				return res.status(400).send({ message: "invalid gerobak type" });
+
 			gerobakModel
 				.create(req.body)
 				.then(() => res.send({ message: "gerobak created" }))
