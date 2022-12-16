@@ -1,7 +1,5 @@
 const gerobakTypeModel = require("../model/gerobakTypeModel");
-const uuid = require("uuid");
 const isIdenticalObject = require("../../helper/is-identical-object");
-const db = require("../../database").db;
 
 module.exports = {
 	listGerobakType: async (req, res) => {
@@ -40,7 +38,7 @@ module.exports = {
 			gerobakTypeModel
 				.create(req.body)
 				.then(() => res.send({ message: "gerobak type created" }))
-				.catch((err) => res.send(err));
+				.catch((err) => res.status(400).send(err));
 		} catch (e) {
 			console.log(e);
 			res.sendStatus(500);

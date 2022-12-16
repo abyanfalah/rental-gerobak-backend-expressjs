@@ -1,4 +1,3 @@
-const sha1 = require("sha1");
 const userModel = require("../model/userModel");
 
 module.exports = {

@@ -8,13 +8,15 @@ const tableName = `gerobak_type`;
 const query = {
 	SELECT_ALL: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC LIMIT ? OFFSET ?`,
 	SELECT_BY_ID: `SELECT * FROM ${tableName} WHERE id = ? LIMIT 1`,
+	GET_NEXT_CODE_BY_ID: `SELECT CONCAT(code,"-", count + 1) as next_code FROM ${tableName} WHERE id = ? LIMIT 1`,
 
 	INSERT: `INSERT INTO ${tableName} SET ?`,
 	UPDATE: `UPDATE ${tableName} SET ? WHERE id = ?`,
 	DELETE: `DELETE FROM ${tableName} WHERE id = ?`,
 
-	// SELECT_LAST_ID: `SELECT id FROM ${tableName} ORDER BY id DESC LIMIT 1`,
+	INCREMENT_COUNT: `UPDATE ${tableName} SET count = count + 1 WHERE id = ?`,
 };
+
 module.exports = {
 	getAll: (limit, offset) => {
 		return new Promise((resolve, reject) => {
@@ -83,6 +85,31 @@ module.exports = {
 					return reject(err);
 				}
 				return resolve(true);
+			});
+		});
+	},
+
+	getNextCode: (id) => {
+		return new Promise((resolve, reject) => {
+			db.query(query.GET_NEXT_CODE_BY_ID, id, (err, result) => {
+				if (err) {
+					console.log(err);
+					return reject(err);
+				}
+				return resolve(result[0].next_code);
+			});
+		});
+	},
+
+	incrementCount: (id) => {
+		return new Promise((resolve, reject) => {
+			db.query(query.INCREMENT_COUNT, id, (err) => {
+				if (err) {
+					console.log(err);
+					return reject(err);
+				}
+				console.log("count + 1 for gerobak type: ", id);
+				return resolve();
 			});
 		});
 	},

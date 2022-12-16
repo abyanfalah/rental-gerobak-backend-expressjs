@@ -1,7 +1,5 @@
 const gerobakModel = require("../model/gerobakModel");
-const uuid = require("uuid");
 const isIdenticalObject = require("../../helper/is-identical-object");
-const db = require("../../database").db;
 
 module.exports = {
 	listGerobak: async (req, res) => {

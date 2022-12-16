@@ -1,7 +1,7 @@
 const db = require("../../database").db;
 const uuid = require("uuid");
-const sha1 = require("sha1");
 const sqlDate = require("js-date-to-sql-datetime");
+const gerobakTypeModel = require("./gerobakTypeModel");
 
 const tableName = `gerobak`;
 
@@ -36,17 +36,23 @@ module.exports = {
 		});
 	},
 
-	create: (newData) => {
+	create: async (newData) => {
 		newData.id = uuid.v4();
 		const today = sqlDate(Date.now());
 		newData.created_at = today;
 		newData.updated_at = today;
+		newData.code = await gerobakTypeModel.getNextCode(newData.type_id);
 
 		return new Promise((resolve, reject) => {
-			db.query(query.INSERT, newData, (err) => {
-				if (err) return reject(err);
+			try {
+				db.beginTransaction();
+				db.query(query.INSERT, newData);
+				gerobakTypeModel.incrementCount(newData.type_id);
+				db.commit();
 				return resolve();
-			});
+			} catch (e) {
+				return reject(e);
+			}
 		});
 	},
 

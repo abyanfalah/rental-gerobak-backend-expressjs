@@ -1,8 +1,5 @@
 const customerModel = require("../model/customerModel");
-const uuid = require("uuid");
-const sha1 = require("sha1");
 const isIdenticalObject = require("../../helper/is-identical-object");
-const db = require("../../database").db;
 
 module.exports = {
 	listCustomer: async (req, res) => {
