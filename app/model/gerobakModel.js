@@ -63,10 +63,8 @@ module.exports = {
 				db.query(query.UPDATE, [newData, newData.id]);
 				gerobakTypeModel.incrementCount(newData.type_id);
 				db.commit();
-				console.log("=========== tx success ============");
 				return resolve();
 			} catch (e) {
-				console.log("got error on tx: ==> ", e);
 				return reject(e);
 			}
 		});
