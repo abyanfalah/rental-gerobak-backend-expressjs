@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.get("/", rentController.listRent);
 router.get("/:id", rentController.getRent);
+// router.get("/:id/detail", rentController.getRent);
 
 router.post("/", isLogin, rentController.createRent);
 router.put("/:id", isAdmin, rentController.updateRent);

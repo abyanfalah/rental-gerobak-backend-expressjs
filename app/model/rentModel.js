@@ -50,6 +50,13 @@ module.exports = {
 				};
 
 				const rentedGerobakIdList = newData.gerobak_list;
+				for (let id of rentedGerobakIdList) {
+					if ((await gerobakModel.getGerobakStatus(id)) != "ADA")
+						return reject(
+							"invalid gerobak list (probably trying to rent rented one(s)?)"
+						);
+				}
+
 				let rentDetail = {
 					rent_id: rentData.id,
 					start_time: today,

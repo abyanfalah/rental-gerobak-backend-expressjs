@@ -1,4 +1,5 @@
 const rentModel = require("../model/rentModel");
+const rentDetailModel = require("../model/rentDetailModel");
 const isIdenticalObject = require("../../helper/is-identical-object");
 
 module.exports = {
@@ -24,8 +25,26 @@ module.exports = {
 			if (!foundRent) {
 				return res.sendStatus(404);
 			}
+			foundRent.detail = await rentDetailModel.getByRentId(foundRent.id);
+
 			res.send({
 				data: foundRent,
+			});
+		} catch (e) {
+			console.log(e);
+			res.sendStatus(500);
+		}
+	},
+
+	getRentDetail: async (req, res) => {
+		try {
+			let foundRentDetails = await rentDetailModel.getByRentId(req.params.id);
+			if (!foundRentDetails || foundRentDetails.length < 1) {
+				return res.sendStatus(404);
+			}
+
+			res.send({
+				data: foundRentDetails,
 			});
 		} catch (e) {
 			console.log(e);
@@ -40,7 +59,7 @@ module.exports = {
 		rentModel
 			.create(req.body)
 			.then(() => res.send({ message: "rent created" }))
-			.catch((err) => res.status(500).send(err));
+			.catch((err) => res.status(500).send({ err }));
 	},
 
 	updateRent: async (req, res) => {
