@@ -59,16 +59,17 @@ module.exports = {
 			}
 
 			req.body.id = GerobakId;
-			req.body.password = sha1(req.body.password);
 
-			if (isIdenticalObject(req.body, foundGerobak)) {
+			if (req.body.type_id == foundGerobak.type_id) {
 				return res.send({ message: "same data, no changes were made" });
 			}
+
+			req.body.code = await gerobakTypeModel.getNextCode(req.body.type_id);
 
 			gerobakModel
 				.update(req.body)
 				.then(() => res.send({ message: "gerobak updated" }))
-				.catch((err) => res.send(err));
+				.catch((err) => res.status(501).send(err));
 		} catch (e) {
 			console.log(e);
 			res.sendStatus(500);

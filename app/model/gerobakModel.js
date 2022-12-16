@@ -37,14 +37,14 @@ module.exports = {
 	},
 
 	create: async (newData) => {
-		newData.id = uuid.v4();
-		const today = sqlDate(Date.now());
-		newData.created_at = today;
-		newData.updated_at = today;
-		newData.code = await gerobakTypeModel.getNextCode(newData.type_id);
-
 		return new Promise((resolve, reject) => {
 			try {
+				newData.id = uuid.v4();
+				const today = sqlDate(Date.now());
+				newData.created_at = today;
+				newData.updated_at = today;
+				newData.code = gerobakTypeModel.getNextCode(newData.type_id);
+
 				db.beginTransaction();
 				db.query(query.INSERT, newData);
 				gerobakTypeModel.incrementCount(newData.type_id);
@@ -56,13 +56,19 @@ module.exports = {
 		});
 	},
 
-	update: (newData) => {
-		newData.updated_at = sqlDate(Date.now());
+	update: async (newData) => {
 		return new Promise((resolve, reject) => {
-			db.query(query.UPDATE, [newData, newData.id], (err) => {
-				if (err) return reject(err);
+			try {
+				db.beginTransaction();
+				db.query(query.UPDATE, [newData, newData.id]);
+				gerobakTypeModel.incrementCount(newData.type_id);
+				db.commit();
+				console.log("=========== tx success ============");
 				return resolve();
-			});
+			} catch (e) {
+				console.log("got error on tx: ==> ", e);
+				return reject(e);
+			}
 		});
 	},
 

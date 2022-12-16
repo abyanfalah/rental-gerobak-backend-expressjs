@@ -35,10 +35,6 @@ module.exports = {
 
 	createGerobakType: async (req, res) => {
 		try {
-			const foundType = await gerobakTypeModel.getById(req.body.type_id);
-			if (!foundType || foundType.deleted_at != null)
-				return res.status(400).send({ message: "invalid gerobak type" });
-
 			gerobakTypeModel
 				.create(req.body)
 				.then(() => res.send({ message: "gerobak type created" }))

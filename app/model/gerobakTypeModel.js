@@ -96,12 +96,6 @@ module.exports = {
 					console.log(err);
 					return reject(err);
 				}
-
-				// if (result.length < 1) {
-				// 	console.log("no type with");
-				// 	return reject();
-				// }
-
 				return resolve(result[0].next_code);
 			});
 		});
@@ -114,7 +108,6 @@ module.exports = {
 					console.log(err);
 					return reject(err);
 				}
-				console.log("count + 1 for gerobak type: ", id);
 				return resolve();
 			});
 		});
