@@ -12,6 +12,8 @@ const query = {
 	INSERT: `INSERT INTO ${tableName} SET ?`,
 	UPDATE: `UPDATE ${tableName} SET ? WHERE id = ?`,
 	DELETE: `DELETE FROM ${tableName} WHERE id = ?`,
+
+	UPDATE_STATUS: `UPDATE ${tableName} SET status = ? WHERE id = ?`,
 };
 module.exports = {
 	getAll: (limit, offset) => {
@@ -90,6 +92,21 @@ module.exports = {
 					console.log(err);
 					return reject(err);
 				}
+				return resolve(true);
+			});
+		});
+	},
+
+	updateStatus: async (newStatus, id) => {
+		return new Promise((resolve, reject) => {
+			db.query(query.UPDATE_STATUS, [newStatus, id], (err) => {
+				if (err) {
+					console.log(err);
+					return reject(err);
+				}
+
+				console.log("set gerobak => ", id);
+				console.log("status => ", newStatus);
 				return resolve(true);
 			});
 		});

@@ -9,6 +9,8 @@ module.exports = {
 	},
 
 	isLogin: (req, res, next) => {
+		return next();
+
 		if (!req.session.user) {
 			const message = "should login to access";
 			console.log(message);

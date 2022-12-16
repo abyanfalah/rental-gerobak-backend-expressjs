@@ -2,7 +2,7 @@ const db = require(`../../database`).db;
 const uuid = require(`uuid`);
 const sqlDate = require(`js-date-to-sql-datetime`);
 
-const tableName = `customer`;
+const tableName = "rent_detail";
 
 const query = {
 	SELECT_ALL: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC LIMIT ? OFFSET ?`,

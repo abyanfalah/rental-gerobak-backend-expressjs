@@ -1,16 +1,17 @@
 const db = require(`../../database`).db;
 const uuid = require(`uuid`);
 const sqlDate = require(`js-date-to-sql-datetime`);
+const gerobakModel = require("./gerobakModel");
 
-const tableName = `customer`;
+const tableName = "rent";
 
 const query = {
-	SELECT_ALL: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC LIMIT ? OFFSET ?`,
+	SELECT_ALL: `SELECT * FROM ${tableName} ORDER BY created_at ASC LIMIT ? OFFSET ?`,
 	SELECT_BY_ID: `SELECT * FROM ${tableName} WHERE id = ? LIMIT 1`,
 
 	INSERT: `INSERT INTO ${tableName} SET ?`,
-	UPDATE: `UPDATE ${tableName} SET ? WHERE id = ?`,
-	DELETE: `DELETE FROM ${tableName} WHERE id = ?`,
+	// UPDATE: `UPDATE ${tableName} SET ? WHERE id = ?`,
+	// DELETE: `DELETE FROM ${tableName} WHERE id = ?`,
 };
 
 module.exports = {
@@ -36,20 +37,30 @@ module.exports = {
 		});
 	},
 
-	create: (newData) => {
-		newData.id = uuid.v4();
-		const today = sqlDate(Date.now());
-		newData.created_at = today;
-		newData.updated_at = today;
-
+	create: async (newData) => {
 		return new Promise((resolve, reject) => {
-			db.query(query.INSERT, newData, (err) => {
-				if (err) {
-					console.log(err);
-					return reject(err);
+			try {
+				const today = sqlDate(Date.now());
+				const rentData = {
+					id: uuid.v4(),
+					created_at: today,
+					user_id: newData.user_id,
+					customer_id: newData.customer_id,
+				};
+
+				const rentedGerobakList = newData.gerobak_list;
+
+				db.beginTransaction();
+				db.query(query.INSERT, rentData);
+				for (let id of rentedGerobakList) {
+					gerobakModel.updateStatus("DISEWA", id);
 				}
-				return resolve(true);
-			});
+				db.commit();
+				resolve(true);
+			} catch (e) {
+				console.log("entah apa yang salah	===>:", e);
+				return reject(e);
+			}
 		});
 	},
 

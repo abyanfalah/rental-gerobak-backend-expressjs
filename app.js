@@ -31,5 +31,6 @@ app.use("/user", usersRouter);
 app.use("/auth", require("./routes/auth"));
 app.use("/gerobak", require("./routes/gerobak"));
 app.use("/customer", require("./routes/customer"));
+app.use("/rent", require("./routes/rent"));
 
 module.exports = app;

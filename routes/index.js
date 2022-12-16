@@ -1,4 +1,5 @@
 const express = require("express");
+const { db } = require("../database");
 const router = express.Router();
 
 /* GET home page. */
@@ -13,4 +14,8 @@ router.get("/session", (req, res) => {
 	res.send(req.session);
 });
 
+router.get("/reset", (req, res) => {
+	db.query("update gerobak set status = 'ADA'");
+	res.send({ message: "OK" });
+});
 module.exports = router;
