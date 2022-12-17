@@ -106,6 +106,11 @@ module.exports = {
 	// },
 
 	payAll: async (req, res) => {
+		let foundRent = await rentModel.getById(req.params.id);
+		if (!foundRent) return res.sendStatus(404);
+		if (foundRent.status == "OK")
+			return res.status(400).send({ message: "rent is already paid" });
+
 		try {
 			console.log("pay all controller hit");
 			rentModel

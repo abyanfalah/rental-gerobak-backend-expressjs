@@ -127,9 +127,27 @@ module.exports = {
 			try {
 				const gerobakIdList = await rentDetailModel.getGerobakListByRentId(id);
 				db.beginTransaction();
-				console.log("transaction begin");
 				for (let gerobakId of gerobakIdList) {
-					console.log("updating gerobak => ", gerobakId);
+					await gerobakModel.updateStatus("ADA", gerobakId);
+				}
+				await rentDetailModel.updateAllDetailStatus("OK", id);
+				db.query(query.UPDATE, [{ status: "OK" }, id]);
+				db.commit();
+				console.log("tx success");
+				return resolve();
+			} catch (e) {
+				console.log(e);
+				return reject(e);
+			}
+		});
+	},
+
+	payPartialDetail: (id) => {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const gerobakIdList = await rentDetailModel.getGerobakListByRentId(id);
+				db.beginTransaction();
+				for (let gerobakId of gerobakIdList) {
 					await gerobakModel.updateStatus("ADA", gerobakId);
 				}
 				await rentDetailModel.updateAllDetailStatus("OK", id);
