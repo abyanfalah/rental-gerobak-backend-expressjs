@@ -133,7 +133,6 @@ module.exports = {
 				await rentDetailModel.updateAllDetailStatus("OK", id);
 				db.query(query.UPDATE, [{ status: "OK" }, id]);
 				db.commit();
-				console.log("tx success");
 				return resolve();
 			} catch (e) {
 				console.log(e);
@@ -142,16 +141,15 @@ module.exports = {
 		});
 	},
 
-	payPartialDetail: (id) => {
+	payPartialDetail: (id, gerobakIdList) => {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const gerobakIdList = await rentDetailModel.getGerobakListByRentId(id);
 				db.beginTransaction();
 				for (let gerobakId of gerobakIdList) {
 					await gerobakModel.updateStatus("ADA", gerobakId);
+					await rentDetailModel.updateDetailStatus("OK", id, gerobakId);
 				}
-				await rentDetailModel.updateAllDetailStatus("OK", id);
-				db.query(query.UPDATE, [{ status: "OK" }, id]);
+				db.query(query.UPDATE, [{ status: "PARTIAL" }, id]);
 				db.commit();
 				console.log("tx success");
 				return resolve();

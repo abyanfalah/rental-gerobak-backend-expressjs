@@ -9,8 +9,10 @@ const query = {
 	SELECT_BY_RENT_ID: `SELECT * FROM ${tableName} WHERE rent_id = ?`,
 
 	GET_GEROBAK_LIST_BY_RENT_ID: `SELECT gerobak_id FROM ${tableName} WHERE rent_id = ?`,
+	// GET_GEROBAK_LIST_BY_RENT_ID_AND_STATUS: `SELECT gerobak_id FROM ${tableName} WHERE rent_id = ? AND status = ?`,
 
 	SET_ALL_DETAIL_STATUS_BY_RENT_ID: `UPDATE ${tableName} SET status = ? WHERE rent_id = ?`,
+	SET_DETAIL_STATUS_BY_RENT_ID_AND_GEROBAK_ID: `UPDATE ${tableName} SET status = ? WHERE rent_id = ? AND gerobak_id = ?`,
 
 	INSERT: `INSERT INTO ${tableName} SET ?`,
 	UPDATE: `UPDATE ${tableName} SET ? WHERE id = ?`,
@@ -93,9 +95,12 @@ module.exports = {
 		});
 	},
 
-	getGerobakListByRentId: (id) => {
+	getGerobakListByRentId: (id, status) => {
+		let sql = query.GET_GEROBAK_LIST_BY_RENT_ID;
+		if (status) sql += ` AND status = "${status}"`;
+
 		return new Promise((resolve, reject) => {
-			db.query(query.GET_GEROBAK_LIST_BY_RENT_ID, id, (err, result) => {
+			db.query(sql, id, (err, result) => {
 				if (err) {
 					console.log(err);
 					return reject(err);
@@ -111,6 +116,22 @@ module.exports = {
 			db.query(
 				query.SET_ALL_DETAIL_STATUS_BY_RENT_ID,
 				[status, rentId],
+				(err) => {
+					if (err) {
+						console.log(err);
+						return reject(err);
+					}
+					return resolve(true);
+				}
+			);
+		});
+	},
+
+	updateDetailStatus: (status, rentId, gerobakId) => {
+		return new Promise((resolve, reject) => {
+			db.query(
+				query.SET_DETAIL_STATUS_BY_RENT_ID_AND_GEROBAK_ID,
+				[status, rentId, gerobakId],
 				(err) => {
 					if (err) {
 						console.log(err);

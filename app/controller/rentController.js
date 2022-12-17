@@ -112,10 +112,47 @@ module.exports = {
 			return res.status(400).send({ message: "rent is already paid" });
 
 		try {
-			console.log("pay all controller hit");
 			rentModel
-				.payAllDetail(req.params.id)
+				.payAllDetail(foundRent.id)
 				.then(() => res.send({ message: "payment successfull" }))
+				.catch((err) => res.status(400).send({ err }));
+		} catch (err) {
+			console.log(err);
+			res.status(500).send({ err });
+		}
+	},
+
+	payPartial: async (req, res) => {
+		let foundRent = await rentModel.getById(req.params.id);
+		if (!foundRent) return res.sendStatus(404);
+		if (foundRent.status == "OK")
+			return res.status(400).send({ message: "rent is already paid" });
+
+		let rentedGerobakIdList = await rentDetailModel.getGerobakListByRentId(
+			foundRent.id
+		);
+		rentedGerobakIdList = rentedGerobakIdList.sort((a, b) => b - a);
+
+		let paidGerobakList = await rentDetailModel.getGerobakListByRentId(
+			foundRent.id,
+			"OK"
+		);
+		paidGerobakList = paidGerobakList.sort((a, b) => b - a);
+
+		if (rentedGerobakIdList.length == req.body.gerobak_id_list)
+			return res.send({ message: "trying to pay all?" });
+
+		return res.send({
+			rentedGerobakIdList,
+			paidGerobakList,
+			// pay: req.body.gerobak_id_list,
+		});
+
+		try {
+			console.log("pay partial controller hit");
+			rentModel
+				.payPartialDetail(foundRent.id, req.body.gerobak_id_list)
+				.then(() => res.send({ message: "partial payment successfull" }))
 				.catch((err) => res.status(400).send({ err }));
 		} catch (err) {
 			console.log(err);

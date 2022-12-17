@@ -7,7 +7,7 @@ const router = express.Router();
 
 // payment
 router.post("/:id/pay/all", rentController.payAll);
-// router.post("/:id/pay", rentController.partialPay);
+router.post("/:id/pay", rentController.payPartial);
 
 router.get("/", rentController.listRent);
 router.get("/:id", rentController.getRent);
