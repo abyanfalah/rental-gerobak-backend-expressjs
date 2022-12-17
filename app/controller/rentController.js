@@ -128,24 +128,25 @@ module.exports = {
 		if (foundRent.status == "OK")
 			return res.status(400).send({ message: "rent is already paid" });
 
-		let rentedGerobakIdList = await rentDetailModel.getGerobakListByRentId(
-			foundRent.id
-		);
-		rentedGerobakIdList = rentedGerobakIdList.sort((a, b) => b - a);
+		const gerobakPayList = req.body.gerobak_id_list;
 
-		let paidGerobakList = await rentDetailModel.getGerobakListByRentId(
-			foundRent.id,
-			"OK"
-		);
-		paidGerobakList = paidGerobakList.sort((a, b) => b - a);
+		let unpaidGerobakIdList =
+			await rentDetailModel.getUnpaidGerobakListByRentId(foundRent.id);
 
-		if (rentedGerobakIdList.length == req.body.gerobak_id_list)
-			return res.send({ message: "trying to pay all?" });
+		for (const id of gerobakPayList) {
+			if (!unpaidGerobakIdList.includes(id))
+				return res.status(400).send({
+					message: "invalid gerobak paylist",
+				});
+		}
+
+		if (gerobakPayList.length == unpaidGerobakIdList.length)
+			return res.status(400).send({ message: "trying to pay all?" });
 
 		return res.send({
-			rentedGerobakIdList,
-			paidGerobakList,
-			// pay: req.body.gerobak_id_list,
+			unpaidGerobakIdList,
+			// paidGerobakList,
+			gerobakPayList,
 		});
 
 		try {

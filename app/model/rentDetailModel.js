@@ -9,6 +9,9 @@ const query = {
 	SELECT_BY_RENT_ID: `SELECT * FROM ${tableName} WHERE rent_id = ?`,
 
 	GET_GEROBAK_LIST_BY_RENT_ID: `SELECT gerobak_id FROM ${tableName} WHERE rent_id = ?`,
+
+	GET_UNPAID_GEROBAK_LIST_BY_RENT_ID: `SELECT gerobak_id FROM ${tableName} WHERE rent_id = ? AND status != "OK"`,
+
 	// GET_GEROBAK_LIST_BY_RENT_ID_AND_STATUS: `SELECT gerobak_id FROM ${tableName} WHERE rent_id = ? AND status = ?`,
 
 	SET_ALL_DETAIL_STATUS_BY_RENT_ID: `UPDATE ${tableName} SET status = ? WHERE rent_id = ?`,
@@ -101,6 +104,19 @@ module.exports = {
 
 		return new Promise((resolve, reject) => {
 			db.query(sql, id, (err, result) => {
+				if (err) {
+					console.log(err);
+					return reject(err);
+				}
+				const gerobakIdList = result.map((rentDetail) => rentDetail.gerobak_id);
+				return resolve(gerobakIdList);
+			});
+		});
+	},
+
+	getUnpaidGerobakListByRentId: (id) => {
+		return new Promise((resolve, reject) => {
+			db.query(query.GET_UNPAID_GEROBAK_LIST_BY_RENT_ID, id, (err, result) => {
 				if (err) {
 					console.log(err);
 					return reject(err);
