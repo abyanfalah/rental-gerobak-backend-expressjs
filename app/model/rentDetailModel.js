@@ -8,6 +8,10 @@ const query = {
 	// SELECT_ALL: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC LIMIT ? OFFSET ?`,
 	SELECT_BY_RENT_ID: `SELECT * FROM ${tableName} WHERE rent_id = ?`,
 
+	GET_GEROBAK_LIST_BY_RENT_ID: `SELECT gerobak_id FROM ${tableName} WHERE rent_id = ?`,
+
+	SET_ALL_DETAIL_STATUS_BY_RENT_ID: `UPDATE ${tableName} SET status = ? WHERE rent_id = ?`,
+
 	INSERT: `INSERT INTO ${tableName} SET ?`,
 	UPDATE: `UPDATE ${tableName} SET ? WHERE id = ?`,
 	DELETE: `DELETE FROM ${tableName} WHERE id = ?`,
@@ -86,6 +90,35 @@ module.exports = {
 				}
 				return resolve(true);
 			});
+		});
+	},
+
+	getGerobakListByRentId: (id) => {
+		return new Promise((resolve, reject) => {
+			db.query(query.GET_GEROBAK_LIST_BY_RENT_ID, id, (err, result) => {
+				if (err) {
+					console.log(err);
+					return reject(err);
+				}
+				const gerobakIdList = result.map((rentDetail) => rentDetail.gerobak_id);
+				return resolve(gerobakIdList);
+			});
+		});
+	},
+
+	updateAllDetailStatus: (status, rentId) => {
+		return new Promise((resolve, reject) => {
+			db.query(
+				query.SET_ALL_DETAIL_STATUS_BY_RENT_ID,
+				[status, rentId],
+				(err) => {
+					if (err) {
+						console.log(err);
+						return reject(err);
+					}
+					return resolve(true);
+				}
+			);
 		});
 	},
 };

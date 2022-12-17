@@ -1,13 +1,15 @@
 const express = require("express");
+const rentDetailModel = require("../app/model/rentDetailModel");
 const { db } = require("../database");
 const router = express.Router();
 
 /* GET home page. */
-router.get("/", function (req, res, next) {
-	res.status(200);
-	res.json({
-		message: "hello world",
-	});
+router.get("/test", async function (req, res, next) {
+	res.send(
+		await rentDetailModel.getGerobakListByRentId(
+			"8118a90f-4ad0-4131-ad32-a9df957b03c5"
+		)
+	);
 });
 
 router.get("/session", (req, res) => {

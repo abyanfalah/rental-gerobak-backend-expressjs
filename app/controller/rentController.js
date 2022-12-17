@@ -55,52 +55,66 @@ module.exports = {
 	createRent: async (req, res) => {
 		// req.body.user_id = req.session.user.id;
 		req.body.user_id = "76994af7-23dd-4c1c-a4b7-a3ac67d30328";
+		console.log("======== STIL USING HARDCODED RENT user_id ==========");
 
 		rentModel
 			.create(req.body)
 			.then(() => res.send({ message: "rent created" }))
-			.catch((err) => res.status(500).send({ err }));
+			.catch((err) => res.status(400).send({ err }));
 	},
 
-	updateRent: async (req, res) => {
+	// updateRent: async (req, res) => {
+	// 	try {
+	// 		let rentId = req.params.id;
+	// 		let foundRent = await rentModel.getById(rentId);
+	// 		if (!foundRent) {
+	// 			return res.sendStatus(404);
+	// 		}
+
+	// 		req.body.id = rentId;
+
+	// 		if (isIdenticalObject(req.body, foundRent)) {
+	// 			return res
+	// 				.status(200)
+	// 				.send({ message: "same data, no changes were made" });
+	// 		}
+
+	// 		rentModel
+	// 			.update(req.body)
+	// 			.then(() => res.send({ message: "rent updated" }))
+	// 			.catch((err) => res.send(err));
+	// 	} catch (e) {
+	// 		console.log(e);
+	// 		res.sendStatus(500);
+	// 	}
+	// },
+
+	// deleteRent: async (req, res) => {
+	// 	try {
+	// 		let foundRent = await rentModel.getById(req.params.id);
+	// 		if (!foundRent) {
+	// 			return res.sendStatus(404);
+	// 		}
+	// 		rentModel
+	// 			.delete(foundRent.id)
+	// 			.then(() => res.send({ message: "rent deleted" }))
+	// 			.catch((err) => res.send(err));
+	// 	} catch (e) {
+	// 		console.log(e);
+	// 		res.sendStatus(500);
+	// 	}
+	// },
+
+	payAll: async (req, res) => {
 		try {
-			let rentId = req.params.id;
-			let foundRent = await rentModel.getById(rentId);
-			if (!foundRent) {
-				return res.sendStatus(404);
-			}
-
-			req.body.id = rentId;
-
-			if (isIdenticalObject(req.body, foundRent)) {
-				return res
-					.status(200)
-					.send({ message: "same data, no changes were made" });
-			}
-
+			console.log("pay all controller hit");
 			rentModel
-				.update(req.body)
-				.then(() => res.send({ message: "rent updated" }))
-				.catch((err) => res.send(err));
-		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
-		}
-	},
-
-	deleteRent: async (req, res) => {
-		try {
-			let foundRent = await rentModel.getById(req.params.id);
-			if (!foundRent) {
-				return res.sendStatus(404);
-			}
-			rentModel
-				.delete(foundRent.id)
-				.then(() => res.send({ message: "rent deleted" }))
-				.catch((err) => res.send(err));
-		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+				.payAllDetail(req.params.id)
+				.then(() => res.send({ message: "payment successfull" }))
+				.catch((err) => res.status(400).send({ err }));
+		} catch (err) {
+			console.log(err);
+			res.status(500).send({ err });
 		}
 	},
 };
