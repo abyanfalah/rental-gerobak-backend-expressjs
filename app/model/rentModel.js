@@ -65,12 +65,15 @@ module.exports = {
 					created_at: today,
 				};
 
+				console.log("========== STILL USING WRONG sub_amount ============");
+
 				db.beginTransaction();
 				db.query(query.INSERT, rentData);
 				for (let id of rentedGerobakIdList) {
 					gerobakModel.updateStatus("DISEWA", id);
 					rentDetail.gerobak_id = id;
-					rentDetail.sub_amount = await gerobakModel.getGerobakCharge(id);
+					// rentDetail.sub_amount = await gerobakModel.getGerobakCharge(id);
+					rentDetail.sub_amount = 9999;
 					rentDetailModel.create(rentDetail);
 				}
 				db.commit();
@@ -126,13 +129,19 @@ module.exports = {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const gerobakIdList = await rentDetailModel.getGerobakListByRentId(id);
+
 				db.beginTransaction();
+
 				for (let gerobakId of gerobakIdList) {
 					await gerobakModel.updateStatus("ADA", gerobakId);
 				}
+
 				await rentDetailModel.updateAllDetailStatus("OK", id);
+				await rentDetailModel.setAllEndTime(sqlDate(Date.now()), id);
+
 				db.query(query.UPDATE, [{ status: "OK" }, id]);
 				db.commit();
+
 				return resolve();
 			} catch (e) {
 				console.log(e);
@@ -144,12 +153,21 @@ module.exports = {
 	payPartialDetail: (id, gerobakIdList) => {
 		return new Promise(async (resolve, reject) => {
 			try {
+				const rightNow = sqlDate(Date.now());
 				db.beginTransaction();
 				for (let gerobakId of gerobakIdList) {
 					await gerobakModel.updateStatus("ADA", gerobakId);
 					await rentDetailModel.updateDetailStatus("OK", id, gerobakId);
+					await rentDetailModel.setEndTime(rightNow, id, gerobakId);
 				}
-				db.query(query.UPDATE, [{ status: "PARTIAL" }, id]);
+
+				const unpaidGerobakList =
+					await rentDetailModel.getUnpaidGerobakListByRentId(id);
+
+				let rentStatus = "PARTIAL";
+				if (unpaidGerobakList.length < 1) rentStatus = "OK";
+
+				db.query(query.UPDATE, [{ status: rentStatus }, id]);
 				db.commit();
 				console.log("tx success");
 				return resolve();

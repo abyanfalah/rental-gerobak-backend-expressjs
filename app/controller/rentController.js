@@ -140,19 +140,18 @@ module.exports = {
 				});
 		}
 
-		if (gerobakPayList.length == unpaidGerobakIdList.length)
-			return res.status(400).send({ message: "trying to pay all?" });
-
-		return res.send({
-			unpaidGerobakIdList,
-			// paidGerobakList,
-			gerobakPayList,
-		});
+		// if (gerobakPayList.length == unpaidGerobakIdList.length) {
+		// 	return res.redirect(
+		// 		302
+		// 		,
+		// 		`${req.protocol}://${req.headers.host}/rent/${foundRent.id}/pay/all`
+		// 	);
+		// }
 
 		try {
 			console.log("pay partial controller hit");
 			rentModel
-				.payPartialDetail(foundRent.id, req.body.gerobak_id_list)
+				.payPartialDetail(foundRent.id, gerobakPayList)
 				.then(() => res.send({ message: "partial payment successfull" }))
 				.catch((err) => res.status(400).send({ err }));
 		} catch (err) {

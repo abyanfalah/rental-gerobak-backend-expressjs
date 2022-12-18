@@ -17,6 +17,9 @@ const query = {
 	SET_ALL_DETAIL_STATUS_BY_RENT_ID: `UPDATE ${tableName} SET status = ? WHERE rent_id = ?`,
 	SET_DETAIL_STATUS_BY_RENT_ID_AND_GEROBAK_ID: `UPDATE ${tableName} SET status = ? WHERE rent_id = ? AND gerobak_id = ?`,
 
+	SET_ALL_END_TIME_BY_RENT_ID: `UPDATE ${tableName} SET end_time = ? WHERE rent_id = ?`,
+	SET_END_TIME_BY_RENT_ID_AND_GEROBAK_ID: `UPDATE ${tableName} SET end_time = ? WHERE rent_id = ? AND gerobak_id = ?`,
+
 	INSERT: `INSERT INTO ${tableName} SET ?`,
 	UPDATE: `UPDATE ${tableName} SET ? WHERE id = ?`,
 	DELETE: `DELETE FROM ${tableName} WHERE id = ?`,
@@ -148,6 +151,34 @@ module.exports = {
 			db.query(
 				query.SET_DETAIL_STATUS_BY_RENT_ID_AND_GEROBAK_ID,
 				[status, rentId, gerobakId],
+				(err) => {
+					if (err) {
+						console.log(err);
+						return reject(err);
+					}
+					return resolve(true);
+				}
+			);
+		});
+	},
+
+	setAllEndTime: (endTime, rentId) => {
+		return new Promise((resolve, reject) => {
+			db.query(query.SET_ALL_END_TIME_BY_RENT_ID, [endTime, rentId], (err) => {
+				if (err) {
+					console.log(err);
+					return reject(err);
+				}
+				return resolve(true);
+			});
+		});
+	},
+
+	setEndTime: (endTime, rentId, gerobakId) => {
+		return new Promise((resolve, reject) => {
+			db.query(
+				query.SET_END_TIME_BY_RENT_ID_AND_GEROBAK_ID,
+				[endTime, rentId, gerobakId],
 				(err) => {
 					if (err) {
 						console.log(err);
