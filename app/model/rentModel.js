@@ -8,6 +8,7 @@ const tableName = "rent";
 
 const query = {
 	SELECT_ALL: `SELECT * FROM ${tableName} ORDER BY created_at ASC LIMIT ? OFFSET ?`,
+	SELECT_ALL_BY_STATUS: `SELECT * FROM ${tableName} WHERE status LIKE ? ORDER BY created_at DESC LIMIT ? OFFSET ?`,
 	SELECT_BY_ID: `SELECT * FROM ${tableName} WHERE id = ? LIMIT 1`,
 
 	INSERT: `INSERT INTO ${tableName} SET ?`,
@@ -23,6 +24,19 @@ module.exports = {
 			db.query(
 				query.SELECT_ALL,
 				[parseInt(limit), parseInt(offset)],
+				(err, result) => {
+					if (err) return reject(err);
+					return resolve(result);
+				}
+			);
+		});
+	},
+
+	getAllByStatus: (status, limit, offset) => {
+		return new Promise((resolve, reject) => {
+			db.query(
+				query.SELECT_ALL_BY_STATUS,
+				[status, parseInt(limit), parseInt(offset)],
 				(err, result) => {
 					if (err) return reject(err);
 					return resolve(result);

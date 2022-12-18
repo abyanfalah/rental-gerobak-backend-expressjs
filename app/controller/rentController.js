@@ -1,13 +1,22 @@
 const rentModel = require("../model/rentModel");
 const rentDetailModel = require("../model/rentDetailModel");
-const isIdenticalObject = require("../../helper/is-identical-object");
 
 module.exports = {
 	listRent: async (req, res) => {
-		let limit = req.query.rows ?? 10;
-		let offset = limit * ((req.query.page ?? 1) - 1);
+		const limit = req.query.rows ?? 10;
+		const offset = limit * ((req.query.page ?? 1) - 1);
+		const status = req.query.status;
+
+		// return res.send({ status: status });
+
+		let data = [];
+		if (status) {
+			data = await rentModel.getAllByStatus(status, limit, offset);
+		} else {
+			data = await rentModel.getAll(limit, offset);
+		}
+
 		try {
-			let data = await rentModel.getAll(limit, offset);
 			res.send({
 				data,
 				length: data.length,
