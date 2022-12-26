@@ -7,16 +7,37 @@ const rentDetailModel = require("./rentDetailModel");
 const tableName = "rent";
 
 const query = {
-	SELECT_ALL: `SELECT * FROM ${tableName} ORDER BY created_at ASC LIMIT ? OFFSET ?`,
+	SELECT_ALL: `SELECT * FROM ${tableName} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
 	SELECT_ALL_BY_STATUS: `SELECT * FROM ${tableName} WHERE status LIKE ? ORDER BY created_at DESC LIMIT ? OFFSET ?`,
 	SELECT_BY_ID: `SELECT * FROM ${tableName} WHERE id = ? LIMIT 1`,
 
 	INSERT: `INSERT INTO ${tableName} SET ?`,
 	UPDATE: `UPDATE ${tableName} SET ? WHERE id = ?`,
-	// DELETE: `DELETE FROM ${tableName} WHERE id = ?`,
-
-	// GET_RENT_TOTAL_BILL: `SELECT SUM(sub_amount) as total_bill FROM rent_detail WHERE rent_id = ?`,
 };
+
+async function getRentDetailSubAmount(rentId, gerobakId) {
+	const { charge, hourBase } = await gerobakModel.getGerobakCharge(gerobakId);
+	let hoursDiff = await rentDetailModel.getHoursDiff(rentId);
+
+	console.log("hoursDiff", hoursDiff);
+	console.log("hourBase", hourBase);
+
+	let subAmount = charge;
+	hoursDiff -= hourBase;
+
+	while (hoursDiff > hourBase) {
+		subAmount += charge;
+		hoursDiff -= hourBase;
+	}
+
+	console.log("hoursDiff", hoursDiff);
+	console.log("hourBase", hourBase);
+
+	if (hoursDiff > hourBase / 4) subAmount += charge;
+	else if (hoursDiff > 0) subAmount += (hoursDiff / hourBase) * charge;
+
+	return Math.floor(subAmount / 1000) * 1000;
+}
 
 module.exports = {
 	getAll: (limit, offset) => {
@@ -79,15 +100,12 @@ module.exports = {
 					created_at: today,
 				};
 
-				console.log("========== STILL USING WRONG sub_amount ============");
-
 				db.beginTransaction();
 				db.query(query.INSERT, rentData);
 				for (let id of rentedGerobakIdList) {
 					gerobakModel.updateStatus("DISEWA", id);
 					rentDetail.gerobak_id = id;
 					// rentDetail.sub_amount = await gerobakModel.getGerobakCharge(id);
-					rentDetail.sub_amount = 9999;
 					rentDetailModel.create(rentDetail);
 				}
 				db.commit();
@@ -148,6 +166,8 @@ module.exports = {
 
 				for (let gerobakId of gerobakIdList) {
 					await gerobakModel.updateStatus("ADA", gerobakId);
+					const subAmount = await getRentDetailSubAmount(id, gerobakId);
+					await rentDetailModel.setSubAmount(subAmount, id, gerobakId);
 				}
 
 				await rentDetailModel.updateAllDetailStatus("OK", id);
@@ -173,6 +193,10 @@ module.exports = {
 					await gerobakModel.updateStatus("ADA", gerobakId);
 					await rentDetailModel.updateDetailStatus("OK", id, gerobakId);
 					await rentDetailModel.setEndTime(rightNow, id, gerobakId);
+
+					// TODO: set subAmount
+					const subAmount = await getRentDetailSubAmount(id, gerobakId);
+					await rentDetailModel.setSubAmount(subAmount, id, gerobakId);
 				}
 
 				const unpaidGerobakList =
@@ -190,5 +214,29 @@ module.exports = {
 				return reject(e);
 			}
 		});
+	},
+
+	getRentDetailSubAmount: async (rentId, gerobakId) => {
+		const { charge, hourBase } = await gerobakModel.getGerobakCharge(gerobakId);
+		let hoursDiff = await rentDetailModel.getHoursDiff(rentId);
+
+		console.log("hoursDiff", hoursDiff);
+		console.log("hourBase", hourBase);
+
+		let subAmount = charge;
+		hoursDiff -= hourBase;
+
+		while (hoursDiff > hourBase) {
+			subAmount += charge;
+			hoursDiff -= hourBase;
+		}
+
+		console.log("hoursDiff", hoursDiff);
+		console.log("hourBase", hourBase);
+
+		if (hoursDiff > hourBase / 4) subAmount += charge;
+		else if (hoursDiff > 0) subAmount += (hoursDiff / hourBase) * charge;
+
+		return subAmount;
 	},
 };

@@ -10,7 +10,6 @@ module.exports = {
 
 	isLogin: (req, res, next) => {
 		return next();
-
 		if (!req.session.user) {
 			const message = "should login to access";
 			console.log(message);
@@ -21,7 +20,6 @@ module.exports = {
 
 	isAdmin: (req, res, next) => {
 		return next();
-
 		console.log("only admin can access");
 		if (!req.session.user) {
 			return res.sendStatus(401);

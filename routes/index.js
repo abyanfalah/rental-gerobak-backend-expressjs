@@ -1,28 +1,25 @@
-const { application } = require("express");
 const express = require("express");
+const gerobakModel = require("../app/model/gerobakModel");
 const rentDetailModel = require("../app/model/rentDetailModel");
-const { db } = require("../database");
+const rentModel = require("../app/model/rentModel");
 const router = express.Router();
 
-/* GET home page. */
-router.get("/test", async function (req, res, next) {
-	const data = {
-		url: `${req.protocol}://${req.headers.host}/rent/mock_id/pay/all`,
-	};
+// TODO: delete unnecessary imports
+router.get("/", (req, res) => {
+	res.send("hello world");
+});
 
-	res.send({
-		data,
-	});
+router.get("/test", async (req, res) => {
+	const rentId = "c4d23043-8aff-4f72-9c3b-8a90367fd89b";
+	let data = (await rentDetailModel.getByRentId(rentId))[0];
+	const gerobakId = data.gerobak_id;
+	data.sub_amount = await rentModel.getRentDetailSubAmount(rentId, gerobakId);
+
+	res.send({ data });
 });
 
 router.get("/session", (req, res) => {
 	res.send(req.session);
 });
 
-// router.get("/reset", (req, res) => {
-// 	db.query("update gerobak set status = 'ADA'");
-// 	// db.query("truncate rent_detail");
-// 	db.query("truncate rent");
-// 	res.send({ message: "OK" });
-// });
 module.exports = router;
