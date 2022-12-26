@@ -3,11 +3,15 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const session = require("express-session");
+const cors = require("cors");
 
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 
 const app = express();
+
+app.disable("x-powered-by");
+app.use(cors());
 
 app.use(
 	session({
@@ -15,7 +19,7 @@ app.use(
 		resave: false,
 		saveUninitialized: true,
 		cookie: {
-			maxAge: 60 * 60 * 1000,
+			maxAge: 1000 * 60 * 60,
 		},
 	})
 );
