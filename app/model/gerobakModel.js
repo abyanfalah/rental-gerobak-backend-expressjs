@@ -16,7 +16,7 @@ const query = {
 	GET_GEROBAK_STATUS: `SELECT status FROM ${tableName} WHERE id = ? LIMIT 1`,
 	UPDATE_STATUS: `UPDATE ${tableName} SET status = ? WHERE id = ?`,
 
-	GET_GEROBAK_CHARGE: `SELECT t.charge FROM gerobak_type t INNER JOIN gerobak g ON g.type_id = t.id WHERE g.id = ? LIMIT 1;
+	GET_GEROBAK_CHARGE: `SELECT t.charge, t.hour_base as hourBase FROM gerobak_type t INNER JOIN gerobak g ON g.type_id = t.id WHERE g.id = ? LIMIT 1;
 `,
 };
 module.exports = {
@@ -46,7 +46,6 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			try {
 				newData.id = uuid.v4();
-
 				newData.code = gerobakTypeModel.getNextCode(newData.type_id);
 
 				db.beginTransaction();
@@ -115,7 +114,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.GET_GEROBAK_CHARGE, id, (err, result) => {
 				if (err) return reject(err);
-				return resolve(result[0].charge);
+				return resolve(result[0]);
 			});
 		});
 	},
