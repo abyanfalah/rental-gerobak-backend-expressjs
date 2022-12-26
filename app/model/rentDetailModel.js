@@ -1,10 +1,11 @@
 const db = require(`../../database`).db;
-const uuid = require(`uuid`);
 const sqlDate = require(`js-date-to-sql-datetime`);
+const moment = require("moment");
 
 const tableName = "rent_detail";
 
 const query = {
+	// TODO: remove unneeded sqls
 	// SELECT_ALL: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC LIMIT ? OFFSET ?`,
 	SELECT_BY_RENT_ID: `SELECT * FROM ${tableName} WHERE rent_id = ?`,
 
@@ -20,9 +21,11 @@ const query = {
 	SET_ALL_END_TIME_BY_RENT_ID: `UPDATE ${tableName} SET end_time = ? WHERE rent_id = ?`,
 	SET_END_TIME_BY_RENT_ID_AND_GEROBAK_ID: `UPDATE ${tableName} SET end_time = ? WHERE rent_id = ? AND gerobak_id = ?`,
 
+	SET_SUB_AMOUNT_BY_RENT_ID_AND_GEROBAK_ID: `UPDATE ${tableName} SET sub_amount = ? WHERE rent_id AND gerobak_id = ?`,
+
 	INSERT: `INSERT INTO ${tableName} SET ?`,
-	UPDATE: `UPDATE ${tableName} SET ? WHERE id = ?`,
-	DELETE: `DELETE FROM ${tableName} WHERE id = ?`,
+	// UPDATE: `UPDATE ${tableName} SET ? WHERE id = ?`,
+	// DELETE: `DELETE FROM ${tableName} WHERE id = ?`,
 };
 
 module.exports = {
@@ -187,6 +190,36 @@ module.exports = {
 					return resolve(true);
 				}
 			);
+		});
+	},
+
+	setSubAmount: (subAmount, rentId, gerobakId) => {
+		return new Promise((resolve, reject) => {
+			db.query(
+				query.SET_SUB_AMOUNT_BY_RENT_ID_AND_GEROBAK_ID,
+				[subAmount, rentId, gerobakId],
+				(err) => {
+					if (err) {
+						console.log(err);
+						return reject(err);
+					}
+					return resolve(true);
+				}
+			);
+		});
+	},
+
+	getHoursDiff: (rentId, compareToTime) => {
+		return new Promise((resolve, reject) => {
+			db.query(query.SELECT_BY_RENT_ID, rentId, (err, result) => {
+				if (err) {
+					console.log(err);
+					return reject(err);
+				}
+				compareToTime = moment(compareToTime ?? sqlDate(Date.now()));
+				const startTime = moment(result[0].start_time);
+				return resolve(compareToTime.diff(startTime, "hours"));
+			});
 		});
 	},
 };
