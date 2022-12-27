@@ -1,6 +1,7 @@
 const db = require(`../../database`).db;
 const sqlDate = require(`js-date-to-sql-datetime`);
 const moment = require("moment");
+const gerobakModel = require("./gerobakModel");
 
 const tableName = "rent_detail";
 

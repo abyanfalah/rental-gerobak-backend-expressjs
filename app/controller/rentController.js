@@ -137,10 +137,8 @@ module.exports = {
 			let foundRent = await rentModel.getById(req.params.id);
 			if (!foundRent) return res.sendStatus(404);
 
-			rentModel
-				.getTotalToPay(foundRent.id)
-				.then((bill) => res.send(bill))
-				.catch((err) => res.status(500).send({ err }));
+			const data = await rentModel.getTotalToPay(foundRent.id);
+			res.send({ data });
 		} catch (err) {
 			console.log(err);
 			res.status(500).send({ err });
@@ -166,7 +164,7 @@ module.exports = {
 					});
 			}
 
-			// 	============= WHEN TRYING TO PAY ALL VIA PARTIAL PAY, will use frontend
+			// 	============= WHEN TRYING TO PAY ALL VIA PARTIAL PAY, will use frontend to handle that
 			// if (gerobakPayList.length == unpaidGerobakIdList.length) {
 			// 	return res.redirect(
 			// 		302
@@ -175,7 +173,6 @@ module.exports = {
 			// 	);
 			// }
 
-			console.log("pay partial controller hit");
 			rentModel
 				.payPartialDetail(foundRent.id, gerobakPayList)
 				.then(() => res.send({ message: "partial payment successfull" }))

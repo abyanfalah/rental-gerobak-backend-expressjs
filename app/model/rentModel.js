@@ -194,7 +194,6 @@ module.exports = {
 				for (const gerobakId of unpaidGerobakList) {
 					totalUnpaid += await rentDetailModel.getSubAmount(rentId, gerobakId);
 				}
-
 				return resolve(totalUnpaid);
 			} catch (e) {
 				console.log(e);
