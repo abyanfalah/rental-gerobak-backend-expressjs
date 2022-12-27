@@ -5,9 +5,6 @@ const logger = require("morgan");
 const session = require("express-session");
 const cors = require("cors");
 
-const indexRouter = require("./routes/index");
-const usersRouter = require("./routes/users");
-
 const app = express();
 
 app.disable("x-powered-by");
@@ -30,8 +27,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/", indexRouter);
-app.use("/user", usersRouter);
+app.use("/", require("./routes/users"));
+app.use("/user", require("./routes/index"));
 app.use("/auth", require("./routes/auth"));
 app.use("/gerobak", require("./routes/gerobak"));
 app.use("/customer", require("./routes/customer"));

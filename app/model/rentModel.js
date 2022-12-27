@@ -15,30 +15,6 @@ const query = {
 	UPDATE: `UPDATE ${tableName} SET ? WHERE id = ?`,
 };
 
-async function getRentDetailSubAmount(rentId, gerobakId) {
-	const { charge, hourBase } = await gerobakModel.getGerobakCharge(gerobakId);
-	let hoursDiff = await rentDetailModel.getHoursDiff(rentId);
-
-	console.log("hoursDiff", hoursDiff);
-	console.log("hourBase", hourBase);
-
-	let subAmount = charge;
-	hoursDiff -= hourBase;
-
-	while (hoursDiff > hourBase) {
-		subAmount += charge;
-		hoursDiff -= hourBase;
-	}
-
-	console.log("hoursDiff", hoursDiff);
-	console.log("hourBase", hourBase);
-
-	if (hoursDiff > hourBase / 4) subAmount += charge;
-	else if (hoursDiff > 0) subAmount += (hoursDiff / hourBase) * charge;
-
-	return Math.floor(subAmount / 1000) * 1000;
-}
-
 module.exports = {
 	getAll: (limit, offset) => {
 		return new Promise((resolve, reject) => {
@@ -162,13 +138,14 @@ module.exports = {
 	payAllDetail: (id) => {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const gerobakIdList = await rentDetailModel.getGerobakListByRentId(id);
+				const unpaidGerobakIdList =
+					await rentDetailModel.getUnpaidGerobakListByRentId(id);
 
 				db.beginTransaction();
 
-				for (let gerobakId of gerobakIdList) {
+				for (let gerobakId of unpaidGerobakIdList) {
 					await gerobakModel.updateStatus("ADA", gerobakId);
-					const subAmount = await getRentDetailSubAmount(id, gerobakId);
+					const subAmount = await rentDetailModel.getSubAmount(id, gerobakId);
 					await rentDetailModel.setSubAmount(subAmount, id, gerobakId);
 				}
 

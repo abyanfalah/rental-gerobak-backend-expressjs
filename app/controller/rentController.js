@@ -66,7 +66,7 @@ module.exports = {
 
 			rentModel
 				.create(req.body)
-				.then(() => res.send({ message: "rent created" }))
+				.then(() => res.send({ message: "rent created", id: "HARDCODED" }))
 				.catch((err) => res.status(400).send({ err }));
 		} catch (err) {
 			res.status(500).send({ err });
