@@ -8,6 +8,7 @@ const query = {
 	// TODO: remove unneeded sqls
 	// SELECT_ALL: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC LIMIT ? OFFSET ?`,
 	SELECT_BY_RENT_ID: `SELECT * FROM ${tableName} WHERE rent_id = ?`,
+	SELECT_BY_RENT_ID_AND_GEROBAK_ID: `SELECT * FROM ${tableName} WHERE rent_id = ? `,
 
 	GET_GEROBAK_LIST_BY_RENT_ID: `SELECT gerobak_id FROM ${tableName} WHERE rent_id = ?`,
 
@@ -48,6 +49,19 @@ module.exports = {
 				if (err) return reject(err);
 				return resolve(result);
 			});
+		});
+	},
+
+	getByRentIdAndGerobakId: (rentId, gerobakId) => {
+		return new Promise((resolve, reject) => {
+			db.query(
+				query.SELECT_BY_RENT_ID_AND_GEROBAK_ID,
+				[rentId, gerobakId],
+				(err, result) => {
+					if (err) return reject(err);
+					return resolve(result[0]);
+				}
+			);
 		});
 	},
 
@@ -221,5 +235,23 @@ module.exports = {
 				return resolve(compareToTime.diff(startTime, "hours"));
 			});
 		});
+	},
+
+	getSubAmount: async (rentId, gerobakId) => {
+		const { charge, hourBase } = await gerobakModel.getGerobakCharge(gerobakId);
+		let hoursDiff = await module.exports.getHoursDiff(rentId);
+
+		let subAmount = charge;
+		hoursDiff -= hourBase;
+
+		while (hoursDiff > hourBase) {
+			subAmount += charge;
+			hoursDiff -= hourBase;
+		}
+
+		if (hoursDiff > hourBase / 2) subAmount += charge;
+		else if (hoursDiff > 0) subAmount += (hoursDiff / hourBase) * charge;
+
+		return Math.floor(subAmount / 1000) * 1000;
 	},
 };
