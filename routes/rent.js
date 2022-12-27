@@ -6,8 +6,9 @@ const { isAdmin, isLogin } = require("../app/middleware/authMiddleware");
 const router = express.Router();
 
 // payment
-router.post("/:id/pay/all", rentController.payAll);
-router.post("/:id/pay", rentController.payPartial);
+router.get("/:id/bill", isLogin, rentController.getBill);
+router.post("/:id/pay/all", isLogin, rentController.payAll);
+router.post("/:id/pay", isLogin, rentController.payPartial);
 
 router.get("/", rentController.listRent);
 router.get("/:id", rentController.getRent);

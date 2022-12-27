@@ -173,20 +173,9 @@ module.exports = {
 					await rentDetailModel.updateDetailStatus("OK", id, gerobakId);
 					await rentDetailModel.setEndTime(rightNow, id, gerobakId);
 
-					// TODO: set subAmount
 					const subAmount = await getRentDetailSubAmount(id, gerobakId);
 					await rentDetailModel.setSubAmount(subAmount, id, gerobakId);
 				}
-
-				const unpaidGerobakList =
-					await rentDetailModel.getUnpaidGerobakListByRentId(id);
-
-				let rentStatus = "PARTIAL";
-				if (unpaidGerobakList.length < 1) rentStatus = "OK";
-
-				db.query(query.UPDATE, [{ status: rentStatus }, id]);
-				db.commit();
-				console.log("tx success");
 				return resolve();
 			} catch (e) {
 				console.log(e);
@@ -195,27 +184,22 @@ module.exports = {
 		});
 	},
 
-	getRentDetailSubAmount: async (rentId, gerobakId) => {
-		const { charge, hourBase } = await gerobakModel.getGerobakCharge(gerobakId);
-		let hoursDiff = await rentDetailModel.getHoursDiff(rentId);
+	getTotalToPay: (rentId) => {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let totalUnpaid = 0;
+				const unpaidGerobakList =
+					await rentDetailModel.getUnpaidGerobakListByRentId(rentId);
 
-		console.log("hoursDiff", hoursDiff);
-		console.log("hourBase", hourBase);
+				for (const gerobakId of unpaidGerobakList) {
+					totalUnpaid += await rentDetailModel.getSubAmount(rentId, gerobakId);
+				}
 
-		let subAmount = charge;
-		hoursDiff -= hourBase;
-
-		while (hoursDiff > hourBase) {
-			subAmount += charge;
-			hoursDiff -= hourBase;
-		}
-
-		console.log("hoursDiff", hoursDiff);
-		console.log("hourBase", hourBase);
-
-		if (hoursDiff > hourBase / 4) subAmount += charge;
-		else if (hoursDiff > 0) subAmount += (hoursDiff / hourBase) * charge;
-
-		return subAmount;
+				return resolve(totalUnpaid);
+			} catch (e) {
+				console.log(e);
+				return reject(e);
+			}
+		});
 	},
 };

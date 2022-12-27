@@ -132,6 +132,21 @@ module.exports = {
 		}
 	},
 
+	getBill: async (req, res) => {
+		try {
+			let foundRent = await rentModel.getById(req.params.id);
+			if (!foundRent) return res.sendStatus(404);
+
+			rentModel
+				.getTotalToPay(foundRent.id)
+				.then((bill) => res.send(bill))
+				.catch((err) => res.status(500).send({ err }));
+		} catch (err) {
+			console.log(err);
+			res.status(500).send({ err });
+		}
+	},
+
 	payPartial: async (req, res) => {
 		try {
 			let foundRent = await rentModel.getById(req.params.id);
