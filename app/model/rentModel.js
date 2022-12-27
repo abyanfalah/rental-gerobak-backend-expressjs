@@ -88,7 +88,7 @@ module.exports = {
 
 				const rentedGerobakIdList = newData.gerobak_list;
 				for (let id of rentedGerobakIdList) {
-					if ((await gerobakModel.getGerobakStatus(id)) != "ADA")
+					if ((await gerobakModel.getGerobakStatus(id)) !== "ADA")
 						return reject(
 							"invalid gerobak list (probably tried to rent rented one(s)?)"
 						);
@@ -103,10 +103,12 @@ module.exports = {
 				db.beginTransaction();
 				db.query(query.INSERT, rentData);
 				for (let id of rentedGerobakIdList) {
-					gerobakModel.updateStatus("DISEWA", id);
+					await gerobakModel.updateStatus("DISEWA", id);
 					rentDetail.gerobak_id = id;
-					// rentDetail.sub_amount = await gerobakModel.getGerobakCharge(id);
-					rentDetailModel.create(rentDetail);
+					rentDetail.sub_amount = (
+						await gerobakModel.getGerobakCharge(id)
+					).charge;
+					await rentDetailModel.create(rentDetail);
 				}
 				db.commit();
 				resolve(true);
