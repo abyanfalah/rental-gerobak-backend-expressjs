@@ -43,10 +43,10 @@ module.exports = {
 	},
 
 	create: async (newData) => {
-		return new Promise((resolve, reject) => {
+		return new Promise(async (resolve, reject) => {
 			try {
 				newData.id = uuid.v4();
-				newData.code = gerobakTypeModel.getNextCode(newData.type_id);
+				newData.code = await gerobakTypeModel.getNextCode(newData.type_id);
 
 				db.beginTransaction();
 				db.query(query.INSERT, newData);
