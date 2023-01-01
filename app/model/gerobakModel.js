@@ -7,6 +7,7 @@ const tableName = `gerobak`;
 
 const query = {
 	SELECT_ALL: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC LIMIT ? OFFSET ?`,
+	SELECT_ALL_NO_PAGINATION: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC `,
 	SELECT_BY_ID: `SELECT * FROM ${tableName} WHERE id = ? LIMIT 1`,
 
 	INSERT: `INSERT INTO ${tableName} SET ?`,
@@ -30,6 +31,15 @@ module.exports = {
 					return resolve(result);
 				}
 			);
+		});
+	},
+
+	getAllNoPagination: () => {
+		return new Promise((resolve, reject) => {
+			db.query(query.SELECT_ALL_NO_PAGINATION, (err, result) => {
+				if (err) return reject(err);
+				return resolve(result);
+			});
 		});
 	},
 

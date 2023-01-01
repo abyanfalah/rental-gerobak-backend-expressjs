@@ -6,12 +6,15 @@ module.exports = {
 	listGerobak: async (req, res) => {
 		let limit = req.query.rows ?? 10;
 		let offset = limit * ((req.query.page ?? 1) - 1);
+
 		try {
-			let data = await gerobakModel.getAll(limit, offset);
+			let data = await gerobakModel.getAllNoPagination();
+			// let data = await gerobakModel.getAll(limit, offset);
+
 			res.send({
 				data,
-				length: data.length,
-				page: parseInt(req.query.page),
+				// length: data.length,
+				// page: parseInt(req.query.page),
 			});
 		} catch (e) {
 			console.log(e);
