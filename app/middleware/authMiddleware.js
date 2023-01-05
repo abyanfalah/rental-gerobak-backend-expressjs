@@ -18,12 +18,13 @@ module.exports = {
 	},
 
 	isAdmin: (req, res, next) => {
-		console.log("only admin can access");
 		if (!req.session.user) {
+			console.log("only admin can access");
 			return res.sendStatus(401);
 		}
 
 		if (req.session.user.access !== "admin") {
+			console.log("only admin can access");
 			return res.sendStatus(403);
 		}
 		next();

@@ -7,25 +7,33 @@ const cors = require("cors");
 
 const app = express();
 
-app.disable("x-powered-by");
-app.use(cors());
-
-app.use(
-	session({
-		secret: "secret",
-		resave: false,
-		saveUninitialized: true,
-		cookie: {
-			maxAge: 1000 * 60 * 60,
-		},
-	})
-);
-
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+
+app.disable("x-powered-by");
+app.use(
+	cors({
+		origin: ["http://localhost:5173"],
+		credentials: true,
+		exposedHeaders: ["set-cookie"],
+	})
+);
+
+app.use(
+	session({
+		secret: "secret",
+		resave: false,
+		saveUninitialized: false,
+		cookie: {
+			maxAge: 1000 * 60 * 60,
+			// secure: true,
+		},
+		unset: "destroy",
+	})
+);
 
 app.use("/", require("./routes/index"));
 app.use("/user", require("./routes/users"));
