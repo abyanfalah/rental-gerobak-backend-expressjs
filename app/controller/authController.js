@@ -15,7 +15,10 @@ module.exports = {
 		delete foundUser.password;
 		req.session.user = foundUser;
 
-		res.send({ message: `logged in as ${foundUser.name}` });
+		res.send({
+			message: `logged in as ${foundUser.name}`,
+			userdata: foundUser,
+		});
 	},
 
 	logout: (req, res) => {
