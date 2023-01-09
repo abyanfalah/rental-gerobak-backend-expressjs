@@ -2,9 +2,10 @@ const userModel = require("../model/userModel");
 
 module.exports = {
 	login: async (req, res) => {
+		const { username, password } = req.body;
 		const credentials = {
-			username: req.body.username,
-			password: req.body.password,
+			username,
+			password,
 		};
 
 		const foundUser = await userModel.getByCredentials(credentials);
@@ -20,5 +21,9 @@ module.exports = {
 	logout: (req, res) => {
 		req.session.destroy();
 		res.send({ message: "logged out successfully" });
+	},
+
+	isLogin: (req, res) => {
+		res.send(req.session.user != null);
 	},
 };
