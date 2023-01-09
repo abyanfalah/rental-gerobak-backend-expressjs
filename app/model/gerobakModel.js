@@ -4,11 +4,14 @@ const sqlDate = require("js-date-to-sql-datetime");
 const gerobakTypeModel = require("./gerobakTypeModel");
 
 const tableName = `gerobak`;
+const viewName = "gerobak_view";
 
 const query = {
 	SELECT_ALL: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC LIMIT ? OFFSET ?`,
 	SELECT_ALL_NO_PAGINATION: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC `,
 	SELECT_BY_ID: `SELECT * FROM ${tableName} WHERE id = ? LIMIT 1`,
+
+	SELECT_VIEW: `SELECT * FROM ${viewName}`,
 
 	INSERT: `INSERT INTO ${tableName} SET ?`,
 	UPDATE: `UPDATE ${tableName} SET ? WHERE id = ?`,
@@ -25,6 +28,19 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(
 				query.SELECT_ALL,
+				[parseInt(limit), parseInt(offset)],
+				(err, result) => {
+					if (err) return reject(err);
+					return resolve(result);
+				}
+			);
+		});
+	},
+
+	getView: (limit, offset) => {
+		return new Promise((resolve, reject) => {
+			db.query(
+				query.SELECT_VIEW,
 				[parseInt(limit), parseInt(offset)],
 				(err, result) => {
 					if (err) return reject(err);

@@ -3,18 +3,28 @@ const rentDetailModel = require("../model/rentDetailModel");
 
 module.exports = {
 	listRent: async (req, res) => {
-		const limit = req.query.rows ?? 10;
-		const offset = limit * ((req.query.page ?? 1) - 1);
-		const status = req.query.status;
-
-		let data = [];
-		if (status) {
-			data = await rentModel.getAllByStatus(status, limit, offset);
-		} else {
-			data = await rentModel.getAll(limit, offset);
-		}
-
 		try {
+			const limit = req.query.rows ?? 10;
+			const offset = limit * ((req.query.page ?? 1) - 1);
+			const status = req.query.status;
+
+			let data = [];
+
+			if (req.query.get_view === "true") {
+				data = await rentModel.getView();
+			} else {
+				if (status) {
+					data = await rentModel.getAllByStatus(status, limit, offset);
+				} else {
+					data = await rentModel.getAll(limit, offset);
+				}
+			}
+
+			if (req.query.with_detail === "true") {
+				for (let i = 0; i < data.length; i++) {
+					data[i].detail = await rentDetailModel.getByRentId(data[i].id);
+				}
+			}
 			res.send({
 				data,
 				length: data.length,

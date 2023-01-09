@@ -13,6 +13,7 @@ module.exports = {
 			return res.status(400).send({ message: "invalid credentials" });
 
 		delete foundUser.password;
+		// delete foundUser.username;
 		req.session.user = foundUser;
 
 		res.send({

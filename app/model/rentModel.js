@@ -5,9 +5,13 @@ const gerobakModel = require("./gerobakModel");
 const rentDetailModel = require("./rentDetailModel");
 
 const tableName = "rent";
+const tableUser = "user";
+const tableCustomer = "customer";
 
 const query = {
 	SELECT_ALL: `SELECT * FROM ${tableName} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+	SELECT_VIEW: `SELECT r.*, u.name as 'user', c.name as 'customer' FROM ${tableName} r inner join ${tableUser} u on r.user_id = u.id inner join ${tableCustomer} c on r.customer_id = c.id ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+
 	SELECT_ALL_BY_STATUS: `SELECT * FROM ${tableName} WHERE status LIKE ? ORDER BY created_at DESC LIMIT ? OFFSET ?`,
 	SELECT_BY_ID: `SELECT * FROM ${tableName} WHERE id = ? LIMIT 1`,
 
@@ -17,9 +21,26 @@ const query = {
 
 module.exports = {
 	getAll: (limit, offset) => {
+		limit = limit ?? 10;
+		offset = offset ?? 0;
 		return new Promise((resolve, reject) => {
 			db.query(
 				query.SELECT_ALL,
+				[parseInt(limit), parseInt(offset)],
+				(err, result) => {
+					if (err) return reject(err);
+					return resolve(result);
+				}
+			);
+		});
+	},
+
+	getView: (limit, offset) => {
+		limit = limit ?? 10;
+		offset = offset ?? 0;
+		return new Promise((resolve, reject) => {
+			db.query(
+				query.SELECT_VIEW,
 				[parseInt(limit), parseInt(offset)],
 				(err, result) => {
 					if (err) return reject(err);
