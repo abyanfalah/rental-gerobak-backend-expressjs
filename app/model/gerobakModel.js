@@ -18,6 +18,7 @@ const query = {
 	DELETE: `DELETE FROM ${tableName} WHERE id = ?`,
 
 	GET_GEROBAK_STATUS: `SELECT status FROM ${tableName} WHERE id = ? LIMIT 1`,
+	GET_GEROBAK_CODE: `SELECT code FROM ${tableName} WHERE id = ? LIMIT 1`,
 	UPDATE_STATUS: `UPDATE ${tableName} SET status = ? WHERE id = ?`,
 
 	GET_GEROBAK_CHARGE: `SELECT t.charge, t.hour_base as hourBase FROM gerobak_type t INNER JOIN gerobak g ON g.type_id = t.id WHERE g.id = ? LIMIT 1;
@@ -62,6 +63,15 @@ module.exports = {
 	getById: (id) => {
 		return new Promise((resolve, reject) => {
 			db.query(query.SELECT_BY_ID, id, (err, result) => {
+				if (err) return reject(err);
+				return resolve(result[0]);
+			});
+		});
+	},
+
+	getCodeById: (id) => {
+		return new Promise((resolve, reject) => {
+			db.query(query.GET_GEROBAK_CODE, id, (err, result) => {
 				if (err) return reject(err);
 				return resolve(result[0]);
 			});

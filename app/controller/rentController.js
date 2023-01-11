@@ -1,5 +1,6 @@
 const rentModel = require("../model/rentModel");
 const rentDetailModel = require("../model/rentDetailModel");
+const gerobakModel = require("../model/gerobakModel");
 
 module.exports = {
 	listRent: async (req, res) => {
@@ -25,6 +26,7 @@ module.exports = {
 					data[i].detail = await rentDetailModel.getByRentId(data[i].id);
 				}
 			}
+
 			res.send({
 				data,
 				length: data.length,
@@ -38,11 +40,22 @@ module.exports = {
 
 	getRent: async (req, res) => {
 		try {
-			let foundRent = await rentModel.getById(req.params.id);
+			let foundRent;
+			if (req.params.get_view === "true") {
+				foundRent = await rentModel.getViewById(req.params.id);
+			} else {
+				foundRent = await rentModel.getById(req.params.id);
+			}
+
 			if (!foundRent) {
 				return res.status(404).send({ message: "rent not found" });
 			}
 			foundRent.detail = await rentDetailModel.getByRentId(foundRent.id);
+			for (let i = 0; i < foundRent.detail.length; i++) {
+				foundRent.detail[i].gerobak = await gerobakModel.getById(
+					foundRent.detail[i].gerobak_id
+				);
+			}
 
 			res.send({
 				data: foundRent,
@@ -53,21 +66,21 @@ module.exports = {
 		}
 	},
 
-	getRentDetail: async (req, res) => {
-		try {
-			let foundRentDetails = await rentDetailModel.getByRentId(req.params.id);
-			if (!foundRentDetails || foundRentDetails.length < 1) {
-				return res.status(404).send({ message: "rent not found" });
-			}
+	// getRentDetail: async (req, res) => {
+	// 	try {
+	// 		let foundRentDetails = await rentDetailModel.getByRentId(req.params.id);
+	// 		if (!foundRentDetails || foundRentDetails.length < 1) {
+	// 			return res.status(404).send({ message: "rent not found" });
+	// 		}
 
-			res.send({
-				data: foundRentDetails,
-			});
-		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
-		}
-	},
+	// 		res.send({
+	// 			data: foundRentDetails,
+	// 		});
+	// 	} catch (e) {
+	// 		console.log(e);
+	// 		res.sendStatus(500);
+	// 	}
+	// },
 
 	createRent: async (req, res) => {
 		try {

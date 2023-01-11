@@ -12,6 +12,8 @@ const query = {
 	SELECT_ALL: `SELECT * FROM ${tableName} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
 	SELECT_VIEW: `SELECT r.*, u.name as 'user', c.name as 'customer' FROM ${tableName} r inner join ${tableUser} u on r.user_id = u.id inner join ${tableCustomer} c on r.customer_id = c.id ORDER BY created_at DESC LIMIT ? OFFSET ?`,
 
+	SELECT_VIEW_BY_RENT_ID: `SELECT r.*, u.name as 'user', c.name as 'customer' FROM ${tableName} r inner join ${tableUser} u on r.user_id = u.id inner join ${tableCustomer} c on r.customer_id = c.id WHERE r.id = ?`,
+
 	SELECT_ALL_BY_STATUS: `SELECT * FROM ${tableName} WHERE status LIKE ? ORDER BY created_at DESC LIMIT ? OFFSET ?`,
 	SELECT_BY_ID: `SELECT * FROM ${tableName} WHERE id = ? LIMIT 1`,
 
@@ -47,6 +49,15 @@ module.exports = {
 					return resolve(result);
 				}
 			);
+		});
+	},
+
+	getViewById: (rentId) => {
+		return new Promise((resolve, reject) => {
+			db.query(query.SELECT_VIEW_BY_RENT_ID, rentId, (err, result) => {
+				if (err) return reject(err);
+				return resolve(result);
+			});
 		});
 	},
 
