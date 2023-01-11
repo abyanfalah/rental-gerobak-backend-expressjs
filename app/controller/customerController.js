@@ -22,7 +22,7 @@ module.exports = {
 		try {
 			let foundCustomer = await customerModel.getById(req.params.id);
 			if (!foundCustomer) {
-				return res.sendStatus(404);
+				return res.status(404).send({ message: "customer not found" });
 			}
 			res.send({
 				data: foundCustomer,
@@ -34,10 +34,12 @@ module.exports = {
 	},
 
 	createCustomer: async (req, res) => {
-		customerModel
-			.create(req.body)
-			.then(() => res.send({ message: "customer created" }))
-			.catch((err) => res.status(500).send(err));
+		try {
+			await customerModel.create(req.body);
+			res.send({ message: "customer created" });
+		} catch (e) {
+			res.status(500).send(err);
+		}
 	},
 
 	updateCustomer: async (req, res) => {
@@ -45,7 +47,7 @@ module.exports = {
 			let customerId = req.params.id;
 			let foundCustomer = await customerModel.getById(customerId);
 			if (!foundCustomer) {
-				return res.sendStatus(404);
+				return res.status(404).send({ message: "customer not found" });
 			}
 
 			req.body.id = customerId;
@@ -56,13 +58,11 @@ module.exports = {
 					.send({ message: "same data, no changes were made" });
 			}
 
-			customerModel
-				.update(req.body)
-				.then(() => res.send({ message: "customer updated" }))
-				.catch((err) => res.send(err));
+			await customerModel.update(req.body);
+			res.send({ message: "customer updated" });
 		} catch (e) {
 			console.log(e);
-			res.sendStatus(500);
+			res.status(500).send(e);
 		}
 	},
 
@@ -70,15 +70,21 @@ module.exports = {
 		try {
 			let foundCustomer = await customerModel.getById(req.params.id);
 			if (!foundCustomer) {
-				return res.sendStatus(404);
+				return res.status(404).send({ message: "customer not found" });
 			}
-			customerModel
-				.delete(foundCustomer.id)
-				.then(() => res.send({ message: "customer deleted" }))
-				.catch((err) => res.send(err));
+
+			if (foundCustomer.deleted_at) {
+				return res.status(400).send({
+					message:
+						"customer is deleted already, contact admin to recover account",
+				});
+			}
+
+			await customerModel.delete(foundCustomer.id);
+			res.send({ message: "customer deleted" });
 		} catch (e) {
 			console.log(e);
-			res.sendStatus(500);
+			res.status(500).send(e);
 		}
 	},
 };

@@ -13,8 +13,8 @@ module.exports = {
 				page: parseInt(req.query.page),
 			});
 		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+			console.error(e);
+			res.status(500).send(e);
 		}
 	},
 
@@ -22,14 +22,14 @@ module.exports = {
 		try {
 			let foundGerobakType = await gerobakTypeModel.getById(req.params.id);
 			if (!foundGerobakType) {
-				return res.sendStatus(404);
+				return res.status(404).send({ message: "gerobak type not found" });
 			}
 			res.send({
 				data: foundGerobakType,
 			});
 		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+			console.error(e);
+			res.status(500).send(e);
 		}
 	},
 
@@ -40,8 +40,8 @@ module.exports = {
 				.then(() => res.send({ message: "gerobak type created" }))
 				.catch((err) => res.status(400).send(err));
 		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+			console.error(e);
+			res.status(500).send(e);
 		}
 	},
 
@@ -50,7 +50,7 @@ module.exports = {
 			let GerobakId = await req.params.id;
 			let foundGerobakType = await gerobakTypeModel.getById(GerobakId);
 			if (!foundGerobakType) {
-				return res.sendStatus(404);
+				return res.status(404).send({ message: "gerobak type not found" });
 			}
 
 			if (isIdenticalObject(req.body, foundGerobakType)) {
@@ -58,13 +58,12 @@ module.exports = {
 			}
 
 			req.body.id = GerobakId;
-			gerobakTypeModel
-				.update(req.body)
-				.then(() => res.send({ message: "gerobak type updated" }))
-				.catch((err) => res.send(err));
+
+			await gerobakTypeModel.update(req.body);
+			res.send({ message: "gerobak type updated" });
 		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+			console.error(e);
+			res.status(500).send(e);
 		}
 	},
 
@@ -72,15 +71,21 @@ module.exports = {
 		try {
 			let foundGerobakType = await gerobakTypeModel.getById(req.params.id);
 			if (!foundGerobakType) {
-				return res.sendStatus(404);
+				return res.status(404).send({ message: "gerobak type not found" });
 			}
-			gerobakTypeModel
-				.delete(foundGerobakType.id)
-				.then(() => res.send({ message: "gerobak type deleted" }))
-				.catch((err) => res.send(err));
+
+			if (foundGerobakType.deleted_at) {
+				return res.status(400).send({
+					message:
+						"gerobak type is deleted already. contact admin to recover account",
+				});
+			}
+
+			await gerobakTypeModel.delete(foundGerobakType.id);
+			res.send({ message: "gerobak type deleted" });
 		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+			console.error(e);
+			res.status(500).send(e);
 		}
 	},
 };

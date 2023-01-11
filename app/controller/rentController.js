@@ -40,7 +40,7 @@ module.exports = {
 		try {
 			let foundRent = await rentModel.getById(req.params.id);
 			if (!foundRent) {
-				return res.sendStatus(404);
+				return res.status(404).send({ message: "rent not found" });
 			}
 			foundRent.detail = await rentDetailModel.getByRentId(foundRent.id);
 
@@ -57,7 +57,7 @@ module.exports = {
 		try {
 			let foundRentDetails = await rentDetailModel.getByRentId(req.params.id);
 			if (!foundRentDetails || foundRentDetails.length < 1) {
-				return res.sendStatus(404);
+				return res.status(404).send({ message: "rent not found" });
 			}
 
 			res.send({
@@ -74,10 +74,10 @@ module.exports = {
 			req.body.user_id = "76994af7-23dd-4c1c-a4b7-a3ac67d30328";
 			console.log("======== STIL USING HARDCODED RENT user_id ==========");
 
-			rentModel
-				.create(req.body)
-				.then(() => res.send({ message: "rent created", id: "HARDCODED" }))
-				.catch((err) => res.status(400).send({ err }));
+			// TODO: remove hardcoded id user
+
+			rentModel.create(req.body);
+			res.send({ message: "rent created", id: "hardcoded" });
 		} catch (err) {
 			res.status(500).send({ err });
 		}
@@ -88,7 +88,7 @@ module.exports = {
 	// 		let rentId = req.params.id;
 	// 		let foundRent = await rentModel.getById(rentId);
 	// 		if (!foundRent) {
-	// 			return res.sendStatus(404);
+	// 			return res.status(404).send({message: "rent not found"});
 	// 		}
 
 	// 		req.body.id = rentId;
@@ -113,7 +113,7 @@ module.exports = {
 	// 	try {
 	// 		let foundRent = await rentModel.getById(req.params.id);
 	// 		if (!foundRent) {
-	// 			return res.sendStatus(404);
+	// 			return res.status(404).send({message: "rent not found"});
 	// 		}
 	// 		rentModel
 	// 			.delete(foundRent.id)
@@ -128,14 +128,13 @@ module.exports = {
 	payAll: async (req, res) => {
 		try {
 			let foundRent = await rentModel.getById(req.params.id);
-			if (!foundRent) return res.sendStatus(404);
+			if (!foundRent)
+				return res.status(404).send({ message: "rent not found" });
 			if (foundRent.status === "OK")
 				return res.status(400).send({ message: "rent is already paid" });
 
-			rentModel
-				.payAllDetail(foundRent.id)
-				.then(() => res.send({ message: "payment successfull" }))
-				.catch((err) => res.status(400).send({ err }));
+			await rentModel.payAllDetail(foundRent.id);
+			res.send({ message: "payment successfull" });
 		} catch (err) {
 			console.log(err);
 			res.status(500).send({ err });
@@ -145,7 +144,8 @@ module.exports = {
 	getBill: async (req, res) => {
 		try {
 			let foundRent = await rentModel.getById(req.params.id);
-			if (!foundRent) return res.sendStatus(404);
+			if (!foundRent)
+				return res.status(404).send({ message: "rent not found" });
 
 			const data = await rentModel.getTotalToPay(foundRent.id);
 			res.send({ data });
@@ -158,7 +158,8 @@ module.exports = {
 	payPartial: async (req, res) => {
 		try {
 			let foundRent = await rentModel.getById(req.params.id);
-			if (!foundRent) return res.sendStatus(404);
+			if (!foundRent)
+				return res.status(404).send({ message: "rent not found" });
 			if (foundRent.status === "OK")
 				return res.status(400).send({ message: "rent is already paid" });
 
@@ -174,6 +175,7 @@ module.exports = {
 					});
 			}
 
+			// TODO: decide following problem
 			// 	============= WHEN TRYING TO PAY ALL VIA PARTIAL PAY, will use frontend to handle that
 			// if (gerobakPayList.length == unpaidGerobakIdList.length) {
 			// 	return res.redirect(
@@ -183,10 +185,8 @@ module.exports = {
 			// 	);
 			// }
 
-			rentModel
-				.payPartialDetail(foundRent.id, gerobakPayList)
-				.then(() => res.send({ message: "partial payment successfull" }))
-				.catch((err) => res.status(400).send({ err }));
+			await rentModel.payPartialDetail(foundRent.id, gerobakPayList);
+			res.send({ message: "partial payment successfull" });
 		} catch (err) {
 			console.log(err);
 			res.status(500).send({ err });

@@ -14,8 +14,8 @@ module.exports = {
 				page: parseInt(req.query.page),
 			});
 		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+			console.error(e);
+			res.status(500).send(e);
 		}
 	},
 
@@ -23,14 +23,14 @@ module.exports = {
 		try {
 			let foundUser = await userModel.getById(req.params.id);
 			if (!foundUser) {
-				return res.sendStatus(404);
+				return res.status(404).send({ message: "user not found" });
 			}
 			res.send({
 				data: foundUser,
 			});
 		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+			console.error(e);
+			res.status(500).send(e);
 		}
 	},
 
@@ -44,13 +44,11 @@ module.exports = {
 					.status(400)
 					.send({ message: "password should be at least 4 characters long" });
 
-			userModel
-				.create(req.body)
-				.then(() => res.send({ message: "user created" }))
-				.catch((err) => res.send(err));
+			await userModel.create(req.body);
+			res.send({ message: "user created" });
 		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+			console.error(e);
+			res.status(500).send(e);
 		}
 	},
 
@@ -59,7 +57,7 @@ module.exports = {
 			let userId = req.params.id;
 			let foundUser = await userModel.getById(userId);
 			if (!foundUser) {
-				return res.sendStatus(404);
+				return res.status(404).send({ message: "user not found" });
 			}
 
 			req.body.id = userId;
@@ -71,13 +69,11 @@ module.exports = {
 					.send({ message: "same data, no changes were made" });
 			}
 
-			userModel
-				.update(req.body)
-				.then(() => res.send({ message: "user updated" }))
-				.catch((err) => res.send(err));
+			await userModel.update(req.body);
+			res.send({ message: "user updated" });
 		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+			console.error(e);
+			res.status(500).send(e);
 		}
 	},
 
@@ -87,16 +83,21 @@ module.exports = {
 				return res.status(400).send({ message: "cannot delete self account" });
 
 			let foundUser = await userModel.getById(req.params.id);
-			if (!foundUser) {
-				return res.sendStatus(404);
+			if (!foundUser /* || foundUser.deleted_at */) {
+				return res.status(404).send({ message: "user not found" });
 			}
-			userModel
-				.delete(foundUser.id)
-				.then(() => res.send({ message: "user deleted" }))
-				.catch((err) => res.send(err));
+
+			if (foundUser.deleted_at) {
+				return res.status(400).send({
+					message: "user is deleted already, contact admin to recover account",
+				});
+			}
+
+			await userModel.delete(foundUser.id);
+			res.send({ message: "user deleted" });
 		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+			console.error(e);
+			res.status(500).send(e);
 		}
 	},
 };

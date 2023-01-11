@@ -115,6 +115,25 @@ module.exports = {
 		});
 	},
 
+	setLastPayment: (paymentDateTime, rentId) => {
+		return new Promise((resolve, reject) => {
+			db.query(
+				query.UPDATE,
+				[
+					{ last_payment_at: paymentDateTime ?? sqlDate(new Date.now()) },
+					rentId,
+				],
+				(err) => {
+					if (err) {
+						console.log(err);
+						return reject(err);
+					}
+					return resolve(true);
+				}
+			);
+		});
+	},
+
 	// update: (newData) => {
 	// 	newData.updated_at = sqlDate(Date.now());
 	// 	return new Promise((resolve, reject) => {
@@ -170,8 +189,11 @@ module.exports = {
 					await rentDetailModel.setSubAmount(subAmount, id, gerobakId);
 				}
 
+				const currentDateTime = sqlDate(Date.now());
+
 				await rentDetailModel.updateAllDetailStatus("OK", id);
-				await rentDetailModel.setAllEndTime(sqlDate(Date.now()), id);
+				await rentDetailModel.setAllEndTime(currentDateTime, id);
+				await module.exports.setLastPayment(currentDateTime, id);
 
 				db.query(query.UPDATE, [{ status: "OK" }, id]);
 				db.commit();
@@ -187,16 +209,18 @@ module.exports = {
 	payPartialDetail: (id, gerobakIdList) => {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const rightNow = sqlDate(Date.now());
+				const currentDateTime = sqlDate(Date.now());
 				db.beginTransaction();
 				for (let gerobakId of gerobakIdList) {
 					await gerobakModel.updateStatus("ADA", gerobakId);
 					await rentDetailModel.updateDetailStatus("OK", id, gerobakId);
-					await rentDetailModel.setEndTime(rightNow, id, gerobakId);
+					await rentDetailModel.setEndTime(currentDateTime, id, gerobakId);
 
 					const subAmount = await getRentDetailSubAmount(id, gerobakId);
 					await rentDetailModel.setSubAmount(subAmount, id, gerobakId);
 				}
+
+				await module.exports.setLastPayment(currentDateTime, id);
 				return resolve();
 			} catch (e) {
 				console.log(e);
