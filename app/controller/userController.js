@@ -61,7 +61,9 @@ module.exports = {
 			}
 
 			req.body.id = userId;
-			req.body.password = sha1(req.body.password);
+			if (req.body.password) {
+				req.body.password = sha1(req.body.password);
+			}
 
 			if (isIdenticalObject(req.body, foundUser)) {
 				return res
