@@ -78,7 +78,7 @@ module.exports = {
 		});
 	},
 
-	create: async (newData) => {
+	create: (newData) => {
 		return new Promise(async (resolve, reject) => {
 			try {
 				newData.id = uuid.v4();
@@ -95,7 +95,7 @@ module.exports = {
 		});
 	},
 
-	update: async (newData) => {
+	update: (newData) => {
 		return new Promise((resolve, reject) => {
 			try {
 				db.beginTransaction();
