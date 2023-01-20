@@ -47,7 +47,7 @@ module.exports = {
 			res.send({ message: "gerobak created" });
 		} catch (e) {
 			console.log(e);
-			res.status(500).send(e);
+			res.status(500).send(err);
 		}
 	},
 
