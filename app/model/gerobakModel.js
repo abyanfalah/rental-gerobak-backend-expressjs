@@ -134,7 +134,7 @@ module.exports = {
 		});
 	},
 
-	updateStatus: async (newStatus, id) => {
+	updateStatus: (newStatus, id) => {
 		return new Promise((resolve, reject) => {
 			db.query(query.UPDATE_STATUS, [newStatus, id], (err) => {
 				if (err) {

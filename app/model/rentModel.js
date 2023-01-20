@@ -83,7 +83,7 @@ module.exports = {
 		});
 	},
 
-	create: async (newData) => {
+	create: (newData) => {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const today = sqlDate(Date.now());
