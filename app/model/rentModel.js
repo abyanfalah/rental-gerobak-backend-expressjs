@@ -186,7 +186,7 @@ module.exports = {
 	// 	});
 	// },
 
-	payAllDetail: (id) => {
+	payAllDetail: (id, userId) => {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const unpaidGerobakIdList =
@@ -217,7 +217,7 @@ module.exports = {
 		});
 	},
 
-	payPartialDetail: (id, gerobakIdList) => {
+	payPartialDetail: (id, gerobakIdList, userId) => {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const currentDateTime = sqlDate(Date.now());

@@ -146,10 +146,10 @@ module.exports = {
 			if (foundRent.status === "OK")
 				return res.status(400).send({ message: "rent is already paid" });
 
-			await rentModel.payAllDetail(foundRent.id);
+			await rentModel.payAllDetail(foundRent.id, req.session.user.id);
 			res.send({ message: "payment successfull" });
 		} catch (err) {
-			console.log(err);
+			console.error(err);
 			res.status(500).send({ err });
 		}
 	},
@@ -163,7 +163,7 @@ module.exports = {
 			const data = await rentModel.getTotalToPay(foundRent.id);
 			res.send({ data });
 		} catch (err) {
-			console.log(err);
+			console.error(err);
 			res.status(500).send({ err });
 		}
 	},
@@ -198,10 +198,14 @@ module.exports = {
 			// 	);
 			// }
 
-			await rentModel.payPartialDetail(foundRent.id, gerobakPayList);
+			await rentModel.payPartialDetail(
+				foundRent.id,
+				gerobakPayList,
+				req.session.body
+			);
 			res.send({ message: "partial payment successfull" });
 		} catch (err) {
-			console.log(err);
+			console.error(err);
 			res.status(500).send({ err });
 		}
 	},
