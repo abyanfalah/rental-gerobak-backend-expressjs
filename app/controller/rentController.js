@@ -23,7 +23,9 @@ module.exports = {
 
 			if (req.query.with_detail === "true") {
 				for (let i = 0; i < data.length; i++) {
-					data[i].detail = await rentDetailModel.getByRentId(data[i].id);
+					data[i].detail = await rentDetailModel.getByRentIdWithGerobakDetails(
+						data[i].id
+					);
 				}
 			}
 
