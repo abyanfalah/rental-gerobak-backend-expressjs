@@ -70,7 +70,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.INSERT, newData, (err) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				return resolve(true);
@@ -83,7 +83,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.UPDATE, [newData, newData.id], (err) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				return resolve(true);
@@ -98,7 +98,7 @@ module.exports = {
 				[{ deleted_at: sqlDate(Date.now()) }, id],
 				(err) => {
 					if (err) {
-						console.log(err);
+						console.error(err);
 						return reject(err);
 					}
 					return resolve(true);
@@ -111,7 +111,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.DELETE, id, (err) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				return resolve(true);
@@ -126,7 +126,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(sql, id, (err, result) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				const gerobakIdList = result.map((rentDetail) => rentDetail.gerobak_id);
@@ -139,7 +139,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.GET_UNPAID_GEROBAK_LIST_BY_RENT_ID, id, (err, result) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				const gerobakIdList = result.map((rentDetail) => rentDetail.gerobak_id);
@@ -155,7 +155,7 @@ module.exports = {
 				[status, rentId],
 				(err) => {
 					if (err) {
-						console.log(err);
+						console.error(err);
 						return reject(err);
 					}
 					return resolve(true);
@@ -171,7 +171,7 @@ module.exports = {
 				[status, rentId, gerobakId],
 				(err) => {
 					if (err) {
-						console.log(err);
+						console.error(err);
 						return reject(err);
 					}
 					return resolve(true);
@@ -184,7 +184,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.SET_ALL_END_TIME_BY_RENT_ID, [endTime, rentId], (err) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				return resolve(true);
@@ -199,7 +199,7 @@ module.exports = {
 				[endTime, rentId, gerobakId],
 				(err) => {
 					if (err) {
-						console.log(err);
+						console.error(err);
 						return reject(err);
 					}
 					return resolve(true);
@@ -215,7 +215,7 @@ module.exports = {
 				[subAmount, rentId, gerobakId],
 				(err) => {
 					if (err) {
-						console.log(err);
+						console.error(err);
 						return reject(err);
 					}
 					return resolve(true);
@@ -228,7 +228,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.SELECT_BY_RENT_ID, rentId, (err, result) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				compareToTime = moment(compareToTime ?? sqlDate(Date.now()));

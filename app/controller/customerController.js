@@ -13,7 +13,7 @@ module.exports = {
 				page: parseInt(req.query.page),
 			});
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 			res.sendStatus(500);
 		}
 	},
@@ -28,7 +28,7 @@ module.exports = {
 				data: foundCustomer,
 			});
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 			res.sendStatus(500);
 		}
 	},
@@ -61,7 +61,7 @@ module.exports = {
 			await customerModel.update(req.body);
 			res.send({ message: "customer updated" });
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 			res.status(500).send(e);
 		}
 	},
@@ -83,7 +83,7 @@ module.exports = {
 			await customerModel.delete(foundCustomer.id);
 			res.send({ message: "customer deleted" });
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 			res.status(500).send(e);
 		}
 	},

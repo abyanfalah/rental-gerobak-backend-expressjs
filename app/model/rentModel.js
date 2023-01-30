@@ -136,7 +136,7 @@ module.exports = {
 				],
 				(err) => {
 					if (err) {
-						console.log(err);
+						console.error(err);
 						return reject(err);
 					}
 					return resolve(true);
@@ -150,7 +150,7 @@ module.exports = {
 	// 	return new Promise((resolve, reject) => {
 	// 		db.query(query.UPDATE, [newData, newData.id], (err) => {
 	// 			if (err) {
-	// 				console.log(err);
+	// 				console.error(err);
 	// 				return reject(err);
 	// 			}
 	// 			return resolve(true);
@@ -165,7 +165,7 @@ module.exports = {
 	// 			[{ deleted_at: sqlDate(Date.now()) }, id],
 	// 			(err) => {
 	// 				if (err) {
-	// 					console.log(err);
+	// 					console.error(err);
 	// 					return reject(err);
 	// 				}
 	// 				return resolve(true);
@@ -178,7 +178,7 @@ module.exports = {
 	// 	return new Promise((resolve, reject) => {
 	// 		db.query(query.DELETE, id, (err) => {
 	// 			if (err) {
-	// 				console.log(err);
+	// 				console.error(err);
 	// 				return reject(err);
 	// 			}
 	// 			return resolve(true);
@@ -211,7 +211,7 @@ module.exports = {
 
 				return resolve();
 			} catch (e) {
-				console.log(e);
+				console.error(e);
 				return reject(e);
 			}
 		});
@@ -234,7 +234,7 @@ module.exports = {
 				await module.exports.setLastPayment(currentDateTime, id);
 				return resolve();
 			} catch (e) {
-				console.log(e);
+				console.error(e);
 				return reject(e);
 			}
 		});
@@ -252,7 +252,7 @@ module.exports = {
 				}
 				return resolve(totalUnpaid);
 			} catch (e) {
-				console.log(e);
+				console.error(e);
 				return reject(e);
 			}
 		});

@@ -33,7 +33,7 @@ module.exports = {
 				page: parseInt(req.query.page),
 			});
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 			res.sendStatus(500);
 		}
 	},
@@ -61,7 +61,7 @@ module.exports = {
 				data: foundRent,
 			});
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 			res.sendStatus(500);
 		}
 	},
@@ -77,7 +77,7 @@ module.exports = {
 	// 			data: foundRentDetails,
 	// 		});
 	// 	} catch (e) {
-	// 		console.log(e);
+	// 		console.error(e);
 	// 		res.sendStatus(500);
 	// 	}
 	// },
@@ -117,7 +117,7 @@ module.exports = {
 	// 			.then(() => res.send({ message: "rent updated" }))
 	// 			.catch((err) => res.send(err));
 	// 	} catch (e) {
-	// 		console.log(e);
+	// 		console.error(e);
 	// 		res.sendStatus(500);
 	// 	}
 	// },
@@ -133,7 +133,7 @@ module.exports = {
 	// 			.then(() => res.send({ message: "rent deleted" }))
 	// 			.catch((err) => res.send(err));
 	// 	} catch (e) {
-	// 		console.log(e);
+	// 		console.error(e);
 	// 		res.sendStatus(500);
 	// 	}
 	// },

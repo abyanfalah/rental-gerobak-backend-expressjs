@@ -42,7 +42,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.INSERT, newData, (err) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				return resolve(true);
@@ -55,7 +55,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.UPDATE, [newData, newData.id], (err) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				return resolve(true);
@@ -70,7 +70,7 @@ module.exports = {
 				[{ deleted_at: sqlDate(Date.now()) }, id],
 				(err) => {
 					if (err) {
-						console.log(err);
+						console.error(err);
 						return reject(err);
 					}
 					return resolve(true);
@@ -83,7 +83,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.DELETE, id, (err) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				return resolve(true);

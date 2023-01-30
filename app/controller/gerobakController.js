@@ -17,7 +17,7 @@ module.exports = {
 				page: parseInt(req.query.page),
 			});
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 			res.status(500).send(e);
 		}
 	},
@@ -32,7 +32,7 @@ module.exports = {
 				data: foundGerobak,
 			});
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 			res.status(500).send(e);
 		}
 	},
@@ -46,7 +46,7 @@ module.exports = {
 			await gerobakModel.create(req.body);
 			res.send({ message: "gerobak created" });
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 			res.status(500).send(err);
 		}
 	},
@@ -70,7 +70,7 @@ module.exports = {
 			await gerobakModel.update(req.body);
 			res.send({ message: "gerobak updated" });
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 			res.status(500).send(e);
 		}
 	},
@@ -92,7 +92,7 @@ module.exports = {
 			await gerobakModel.delete(foundGerobak.id);
 			res.send({ message: "gerobak deleted" });
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 			res.status(500).send(e);
 		}
 	},

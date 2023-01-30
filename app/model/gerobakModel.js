@@ -126,7 +126,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.DELETE, id, (err) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				return resolve(true);
@@ -138,7 +138,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.UPDATE_STATUS, [newStatus, id], (err) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				return resolve(true);

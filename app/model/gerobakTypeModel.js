@@ -77,7 +77,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.DELETE, id, (err) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				return resolve(true);
@@ -89,7 +89,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.GET_NEXT_CODE_BY_ID, id, (err, result) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				return resolve(result[0].next_code);
@@ -101,7 +101,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.INCREMENT_COUNT, id, (err) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				return resolve();
