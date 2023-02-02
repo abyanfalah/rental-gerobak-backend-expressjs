@@ -8,7 +8,12 @@ module.exports = {
 		let offset = limit * ((req.query.page ?? 1) - 1);
 
 		try {
-			let data = await gerobakModel.getAllNoPagination();
+			let data;
+			if (req.query.get_view === "true") {
+				data = await gerobakModel.getView();
+			} else {
+				data = await gerobakModel.getAllNoPagination();
+			}
 			// let data = await gerobakModel.getAll(limit, offset);
 
 			res.send({

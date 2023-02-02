@@ -11,7 +11,7 @@ const query = {
 	SELECT_ALL_NO_PAGINATION: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC `,
 	SELECT_BY_ID: `SELECT * FROM ${tableName} WHERE id = ? LIMIT 1`,
 
-	SELECT_VIEW: `SELECT * FROM ${viewName}`,
+	SELECT_VIEW: `SELECT g.*, gt.name AS 'type_name', gt.hour_base, gt.charge FROM ${tableName} g INNER JOIN gerobak_type gt ON g.type_id = gt.id WHERE g.deleted_at IS null ORDER BY created_at ASC`,
 
 	INSERT: `INSERT INTO ${tableName} SET ?`,
 	UPDATE: `UPDATE ${tableName} SET ? WHERE id = ?`,
