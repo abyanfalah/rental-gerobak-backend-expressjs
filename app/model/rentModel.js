@@ -92,23 +92,11 @@ module.exports = {
 					created_at: currentTime,
 					user_id: newData.user_id,
 					customer_id: newData.customer_id,
+					location: newData.location,
+					note: newData.note,
 				};
 
 				const rentedGerobakIdList = newData.gerobak_list;
-
-				/*
-					CHECK IF RENTING A RENTED GEROBAK
-					THIS CAUSING ERROR, IDK. MIGHT FIX LATER 
-					
-					but it is impossible to rent a rented gerobak
-					from the frontend. so it's not a problem yet.
-				*/
-				// for (let id of rentedGerobakIdList) {
-				// 	if ((await gerobakModel.getGerobakStatus(id)) !== "ADA")
-				// 		return reject(
-				// 			"invalid gerobak list (probably tried to rent rented one(s)?)"
-				// 		);
-				// }
 
 				let rentDetail = {
 					rent_id: rentData.id,
