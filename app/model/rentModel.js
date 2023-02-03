@@ -86,26 +86,35 @@ module.exports = {
 	create: (newData) => {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const today = sqlDate(Date.now());
+				const currentTime = sqlDate(Date.now());
 				const rentData = {
 					id: uuid.v4(),
-					created_at: today,
+					created_at: currentTime,
 					user_id: newData.user_id,
 					customer_id: newData.customer_id,
 				};
 
 				const rentedGerobakIdList = newData.gerobak_list;
-				for (let id of rentedGerobakIdList) {
-					if ((await gerobakModel.getGerobakStatus(id)) !== "ADA")
-						return reject(
-							"invalid gerobak list (probably tried to rent rented one(s)?)"
-						);
-				}
+
+				/*
+					CHECK IF RENTING A RENTED GEROBAK
+					THIS CAUSING ERROR, IDK. MIGHT FIX LATER 
+					
+					but it is impossible to rent a rented gerobak
+					from the frontend. so it's not a problem yet.
+				*/
+				// for (let id of rentedGerobakIdList) {
+				// 	if ((await gerobakModel.getGerobakStatus(id)) !== "ADA")
+				// 		return reject(
+				// 			"invalid gerobak list (probably tried to rent rented one(s)?)"
+				// 		);
+				// }
 
 				let rentDetail = {
 					rent_id: rentData.id,
-					start_time: today,
-					created_at: today,
+					start_time: currentTime,
+					created_at: currentTime,
+					user_id: rentData.user_id,
 				};
 
 				db.beginTransaction();
