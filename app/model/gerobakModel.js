@@ -146,6 +146,10 @@ module.exports = {
 		});
 	},
 
+	/* 
+		getGerobakCharge()
+		returns charge, hour_base
+	*/
 	getGerobakCharge: (id) => {
 		return new Promise((resolve, reject) => {
 			db.query(query.GET_GEROBAK_CHARGE, id, (err, result) => {
