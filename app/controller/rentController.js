@@ -87,12 +87,13 @@ module.exports = {
 	createRent: async (req, res) => {
 		try {
 			req.body.user_id = "76994af7-23dd-4c1c-a4b7-a3ac67d30328";
-			console.log("======== STIL USING HARDCODED RENT user_id ==========");
 
 			// TODO: remove hardcoded id user
 
 			rentModel.create(req.body);
 			res.send({ message: "rent created", id: "hardcoded" });
+
+			console.log("======== STIL USING HARDCODED RENT user_id ==========");
 		} catch (err) {
 			res.status(500).send({ err });
 		}
