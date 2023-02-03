@@ -86,14 +86,23 @@ module.exports = {
 
 	createRent: async (req, res) => {
 		try {
-			req.body.user_id = "76994af7-23dd-4c1c-a4b7-a3ac67d30328";
+			req.body.user_id = req.session.user.id;
+			const gerobakIdList = req.body.gerobak_list;
 
-			// TODO: remove hardcoded id user
+			// check if there is already rented gerobak
+			for (let gerobakId of gerobakIdList) {
+				const gerobakStatus = await gerobakModel.getGerobakStatus(gerobakId);
+				if (gerobakStatus !== "ADA") {
+					return res
+						.status(400)
+						.send(
+							"invalid gerobak list (probably tried to rent rented one(s)?)"
+						);
+				}
+			}
 
 			rentModel.create(req.body);
-			res.send({ message: "rent created", id: "hardcoded" });
-
-			console.log("======== STIL USING HARDCODED RENT user_id ==========");
+			res.send({ message: "rent created" });
 		} catch (err) {
 			res.status(500).send({ err });
 		}
