@@ -12,9 +12,12 @@ const query = {
 	SELECT_ALL: `SELECT * FROM ${tableName} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
 	SELECT_VIEW: `SELECT r.*, u.name as 'user', c.name as 'customer' FROM ${tableName} r inner join ${tableUser} u on r.user_id = u.id inner join ${tableCustomer} c on r.customer_id = c.id ORDER BY created_at DESC LIMIT ? OFFSET ?`,
 
+	SELECT_TODAY_RENT_VIEW: `SELECT r.*, u.name as 'user', c.name as 'customer' FROM ${tableName} r inner join ${tableUser} u on r.user_id = u.id inner join ${tableCustomer} c on r.customer_id = c.id WHERE date(r.created_at) = CURRENT_DATE() ORDER BY created_at DESC`,
+
 	SELECT_VIEW_BY_RENT_ID: `SELECT r.*, u.name as 'user', c.name as 'customer' FROM ${tableName} r inner join ${tableUser} u on r.user_id = u.id inner join ${tableCustomer} c on r.customer_id = c.id WHERE r.id = ?`,
 
-	SELECT_ALL_BY_STATUS: `SELECT * FROM ${tableName} WHERE status LIKE ? ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+	SELECT_ALL_BY_STATUS: `SELECT r.*, u.name as 'user', c.name as 'customer' FROM ${tableName} r inner join ${tableUser} u on r.user_id = u.id inner join ${tableCustomer} c on r.customer_id = c.id WHERE r.status LIKE ? ORDER BY r.created_at DESC LIMIT ? OFFSET ?`,
+
 	SELECT_BY_ID: `SELECT * FROM ${tableName} WHERE id = ? LIMIT 1`,
 
 	INSERT: `INSERT INTO ${tableName} SET ?`,
@@ -66,6 +69,19 @@ module.exports = {
 			db.query(
 				query.SELECT_ALL_BY_STATUS,
 				[status, parseInt(limit), parseInt(offset)],
+				(err, result) => {
+					if (err) return reject(err);
+					return resolve(result);
+				}
+			);
+		});
+	},
+
+	getTodayRentView: () => {
+		return new Promise((resolve, reject) => {
+			db.query(
+				query.SELECT_TODAY_RENT_VIEW,
+				// [parseInt(limit), parseInt(offset)],
 				(err, result) => {
 					if (err) return reject(err);
 					return resolve(result);
