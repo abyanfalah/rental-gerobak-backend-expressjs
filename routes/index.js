@@ -22,4 +22,12 @@ router.get("/session", (req, res) => {
 	res.send(req.session);
 });
 
+router.put("/reset/gerobak", async (req, res) => {
+	const gerobakList = await gerobakModel.getAllNoPagination();
+	for (let gerobak of gerobakList) {
+		await gerobakModel.updateStatus("ADA", gerobak.id);
+	}
+	res.send("ok");
+});
+
 module.exports = router;

@@ -40,6 +40,29 @@ module.exports = {
 		}
 	},
 
+	listTodayRent: async (req, res) => {
+		try {
+			let data = await rentModel.getTodayRentView();
+
+			if (req.query.with_detail === "true") {
+				for (let i = 0; i < data.length; i++) {
+					data[i].detail = await rentDetailModel.getByRentIdWithGerobakDetails(
+						data[i].id
+					);
+				}
+			}
+
+			res.send({
+				data,
+				length: data.length,
+				page: parseInt(req.query.page),
+			});
+		} catch (e) {
+			console.error(e);
+			res.sendStatus(500);
+		}
+	},
+
 	getRent: async (req, res) => {
 		try {
 			let foundRent;
