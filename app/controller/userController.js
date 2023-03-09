@@ -1,7 +1,7 @@
 const userModel = require("../model/userModel");
 const sha1 = require("sha1");
 const isIdenticalObject = require("../../helper/is-identical-object");
-
+const path = require("path");
 module.exports = {
 	listUser: async (req, res) => {
 		let limit = req.query.rows ?? 10;
@@ -43,6 +43,16 @@ module.exports = {
 				return res
 					.status(400)
 					.send({ message: "password should be at least 4 characters long" });
+
+			if (req.file) {
+				req.body.image = req.file.filename;
+			} else {
+				delete req.body.profilePic;
+			}
+
+			console.clear();
+			console.log("file", req.file);
+			console.log("body", req.body);
 
 			await userModel.create(req.body);
 			res.send({ message: "user created" });
@@ -97,6 +107,31 @@ module.exports = {
 
 			await userModel.delete(foundUser.id);
 			res.send({ message: "user deleted" });
+		} catch (e) {
+			console.error(e);
+			res.status(500).send(e);
+		}
+	},
+
+	getUserImage: async (req, res) => {
+		try {
+			let foundUser = await userModel.getById(req.params.id);
+			if (!foundUser) {
+				return res.status(404).send({ message: "user not found" });
+			}
+
+			if (!foundUser.image)
+				return res.status(404).send("this user has no profil picture");
+
+			const filePath = path.join(
+				__dirname,
+				"..",
+				"..",
+				"uploads/images/user_profile_pictures",
+				foundUser.image
+			);
+
+			res.sendFile(filePath);
 		} catch (e) {
 			console.error(e);
 			res.status(500).send(e);

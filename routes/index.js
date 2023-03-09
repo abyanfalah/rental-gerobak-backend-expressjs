@@ -3,6 +3,7 @@ const gerobakModel = require("../app/model/gerobakModel");
 const rentDetailModel = require("../app/model/rentDetailModel");
 const rentModel = require("../app/model/rentModel");
 const router = express.Router();
+const upload = require("../app/middleware/fileUploadMiddleware");
 
 // TODO: delete unnecessary imports
 router.get("/", (req, res) => {
@@ -28,6 +29,16 @@ router.put("/reset/gerobak", async (req, res) => {
 		await gerobakModel.updateStatus("ADA", gerobak.id);
 	}
 	res.send("ok");
+});
+
+router.post("/upload", upload.single("profilePic"), (req, res) => {
+	console.log(req.file);
+	console.log(req.body);
+
+	res.json({
+		file: req.file,
+		body: req.body,
+	});
 });
 
 module.exports = router;

@@ -40,7 +40,7 @@ module.exports = {
 	},
 
 	create: (newData) => {
-		newData.id = uuid.v4();
+		newData.id = newData.id ?? uuid.v4();
 		newData.password = sha1(newData.password);
 		newData.access = newData.access ?? "user";
 
