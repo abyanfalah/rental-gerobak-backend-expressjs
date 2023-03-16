@@ -10,7 +10,7 @@ const query = {
 	// SELECT_ALL: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC LIMIT ? OFFSET ?`,
 	SELECT_BY_RENT_ID: `SELECT * FROM ${tableName} WHERE rent_id = ?`,
 	SELECT_BY_RENT_ID_AND_GEROBAK_ID: `SELECT * FROM ${tableName} WHERE rent_id = ? `,
-	SELECT_BY_RENT_ID_WITH_GEROBAK_DETAILS: `SELECT rd.*, g.* FROM ${tableName} rd inner join gerobak g on rd.gerobak_id = g.id WHERE rent_id = ?`,
+	SELECT_BY_RENT_ID_WITH_GEROBAK_DETAILS: `SELECT g.*, rd.* FROM ${tableName} rd inner join gerobak g on rd.gerobak_id = g.id WHERE rent_id = ?`,
 
 	GET_GEROBAK_LIST_BY_RENT_ID: `SELECT gerobak_id FROM ${tableName} WHERE rent_id = ?`,
 
@@ -24,7 +24,7 @@ const query = {
 	SET_ALL_END_TIME_BY_RENT_ID: `UPDATE ${tableName} SET end_time = ? WHERE rent_id = ?`,
 	SET_END_TIME_BY_RENT_ID_AND_GEROBAK_ID: `UPDATE ${tableName} SET end_time = ? WHERE rent_id = ? AND gerobak_id = ?`,
 
-	SET_SUB_AMOUNT_BY_RENT_ID_AND_GEROBAK_ID: `UPDATE ${tableName} SET sub_amount = ? WHERE rent_id AND gerobak_id = ?`,
+	SET_SUB_AMOUNT_BY_RENT_ID_AND_GEROBAK_ID: `UPDATE ${tableName} SET sub_amount = ? WHERE rent_id = ? AND gerobak_id = ?`,
 
 	INSERT: `INSERT INTO ${tableName} SET ?`,
 	// UPDATE: `UPDATE ${tableName} SET ? WHERE id = ?`,
@@ -254,19 +254,26 @@ module.exports = {
 
 	getSubAmount: async (rentId, gerobakId) => {
 		const { charge, hourBase } = await gerobakModel.getGerobakCharge(gerobakId);
-		let hoursDiff = await module.exports.getHoursDiff(rentId);
+		let hoursDifference = await module.exports.getHoursDiff(rentId);
+
+		// TODO: set new charging system
 
 		let subAmount = charge;
-		hoursDiff -= hourBase;
+		hoursDifference -= hourBase;
 
-		while (hoursDiff > hourBase) {
+		while (hoursDifference > hourBase) {
 			subAmount += charge;
-			hoursDiff -= hourBase;
+			hoursDifference -= hourBase;
 		}
 
-		if (hoursDiff > hourBase / 2) subAmount += charge;
-		else if (hoursDiff > 0) subAmount += (hoursDiff / hourBase) * charge;
+		const halfHourBase = hourBase / 2;
 
-		return Math.floor(subAmount / 1000) * 1000;
+		if (hoursDifference > halfHourBase) subAmount += charge;
+		else if (hoursDifference > 0)
+			subAmount += (hoursDifference / hourBase) * charge;
+
+		const resultSubAmount = Math.floor(subAmount / 1000) * 1000;
+		module.exports.setSubAmount(resultSubAmount, rentId, gerobakId);
+		return resultSubAmount;
 	},
 };

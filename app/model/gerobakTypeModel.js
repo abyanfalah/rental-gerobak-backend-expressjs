@@ -1,6 +1,4 @@
 const db = require("../../database").db;
-const uuid = require("uuid");
-const sha1 = require("sha1");
 const sqlDate = require("js-date-to-sql-datetime");
 
 const tableName = `gerobak_type`;
