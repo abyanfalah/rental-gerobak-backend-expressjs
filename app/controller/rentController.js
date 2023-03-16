@@ -244,4 +244,86 @@ module.exports = {
 			res.status(500).send({ err });
 		}
 	},
+
+	getSubAmountList: async (req, res) => {
+		try {
+			let foundRent = await rentModel.getById(req.params.id);
+			if (!foundRent)
+				return res.status(404).send({ message: "rent not found" });
+
+			foundRent.details = await rentDetailModel.getByRentIdWithGerobakDetails(
+				foundRent.id
+			);
+
+			// return res.send(foundRent);
+
+			let data = [];
+			for (let i = 0; i < foundRent.details.length; i++) {
+				const gerobakId = foundRent.details[i].gerobak_id;
+				const status = foundRent.details[i].status;
+
+				if (status != "BERLANGSUNG") {
+					data.push(foundRent.details.sub_amount);
+				} else {
+					const subAmount = await rentDetailModel.getSubAmount(
+						foundRent.id,
+						gerobakId
+					);
+
+					await rentDetailModel.setSubAmount(
+						subAmount,
+						foundRent.id,
+						gerobakId
+					);
+
+					data.push(subAmount);
+				}
+			}
+
+			return res.send({ data });
+		} catch (err) {
+			console.error(err);
+			res.status(500).send({ err });
+		}
+	},
+
+	addGerobakToRent: async (req, res) => {
+		try {
+			let foundRent = await rentModel.getById(req.params.id);
+			if (!foundRent)
+				return res.status(404).send({ message: "rent not found" });
+
+			// foundRent.details = await rentDetailModel.getByRentIdWithGerobakDetails(
+			// 	foundRent.id
+			// );
+
+			const gerobakIdList = req.body.gerobak_id_list;
+			// add those gerobak
+
+			const result = await rentModel.addDetailToRent(
+				foundRent.id,
+				gerobakIdList,
+				req.session.user.id
+			);
+
+			return res.send(result);
+		} catch (err) {
+			console.error(err);
+			res.status(500).send({ err });
+		}
+	},
+
+	getRentPaymentHistory: async (req, res) => {
+		try {
+			let foundRent = await rentModel.getById(req.params.id);
+			if (!foundRent)
+				return res.status(404).send({ message: "rent not found" });
+
+			const data = await rentModel.getPaymentHistory(foundRent.id);
+			res.send({ data });
+		} catch (e) {
+			console.error(err);
+			res.status(500).send({ err });
+		}
+	},
 };
