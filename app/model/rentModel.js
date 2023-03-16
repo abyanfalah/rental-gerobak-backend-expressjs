@@ -19,7 +19,7 @@ const query = {
 
 	SELECT_ALL_BY_STATUS: `SELECT r.*, u.name as 'user', c.name as 'customer' FROM ${tableName} r inner join ${tableUser} u on r.user_id = u.id inner join ${tableCustomer} c on r.customer_id = c.id WHERE r.status LIKE ? ORDER BY r.created_at DESC LIMIT ? OFFSET ?`,
 
-	SELECT_PAYMENT_HISTORY_BY_RENT_ID: `select rd.user_id, u.name, rd.end_time as time, sum(rd.sub_amount) as sub_amount from rent_detail rd inner join user u on rd.user_id = u.id where rent_id = ? group by end_time, user_id;`,
+	SELECT_PAYMENT_HISTORY_BY_RENT_ID: `select rd.user_id, u.name, rd.end_time as time, sum(rd.sub_amount) as sub_amount from rent_detail rd inner join user u on rd.user_id = u.id where rent_id = ? AND end_time is not null group by end_time, user_id;`,
 
 	SELECT_BY_ID: `SELECT * FROM ${tableName} WHERE id = ? LIMIT 1`,
 
