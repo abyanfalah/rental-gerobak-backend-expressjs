@@ -75,12 +75,10 @@ module.exports = {
 			if (!foundRent) {
 				return res.status(404).send({ message: "rent not found" });
 			}
-			foundRent.detail = await rentDetailModel.getByRentId(foundRent.id);
-			for (let i = 0; i < foundRent.detail.length; i++) {
-				foundRent.detail[i].gerobak = await gerobakModel.getById(
-					foundRent.detail[i].gerobak_id
-				);
-			}
+
+			foundRent.detail = await rentDetailModel.getByRentIdWithGerobakDetails(
+				foundRent.id
+			);
 
 			res.send({
 				data: foundRent,
@@ -173,22 +171,6 @@ module.exports = {
 	// 	}
 	// },
 
-	payAll: async (req, res) => {
-		try {
-			let foundRent = await rentModel.getById(req.params.id);
-			if (!foundRent)
-				return res.status(404).send({ message: "rent not found" });
-			if (foundRent.status === "OK")
-				return res.status(400).send({ message: "rent is already paid" });
-
-			await rentModel.payAllDetail(foundRent.id, req.session.user.id);
-			res.send({ message: "payment successfull" });
-		} catch (err) {
-			console.error(err);
-			res.status(500).send({ err });
-		}
-	},
-
 	getBill: async (req, res) => {
 		try {
 			let foundRent = await rentModel.getById(req.params.id);
@@ -197,6 +179,23 @@ module.exports = {
 
 			const data = await rentModel.getTotalToPay(foundRent.id);
 			res.send({ data });
+		} catch (err) {
+			console.error(err);
+			res.status(500).send({ err });
+		}
+	},
+
+	payAll: async (req, res) => {
+		try {
+			let foundRent = await rentModel.getById(req.params.id);
+			if (!foundRent)
+				return res.status(404).send({ message: "rent not found" });
+
+			if (foundRent.status === "OK")
+				return res.status(400).send({ message: "rent has been already paid" });
+
+			await rentModel.payAllDetail(foundRent.id, req.session.user.id);
+			res.send({ message: "payment successfull" });
 		} catch (err) {
 			console.error(err);
 			res.status(500).send({ err });

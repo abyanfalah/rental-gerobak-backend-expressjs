@@ -7,6 +7,7 @@ const rentDetailModel = require("./rentDetailModel");
 const tableName = "rent";
 const tableUser = "user";
 const tableCustomer = "customer";
+const rentDetail = "rent_detail";
 
 const query = {
 	SELECT_ALL: `SELECT * FROM ${tableName} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
@@ -17,6 +18,8 @@ const query = {
 	SELECT_VIEW_BY_RENT_ID: `SELECT r.*, u.name as 'user', c.name as 'customer' FROM ${tableName} r inner join ${tableUser} u on r.user_id = u.id inner join ${tableCustomer} c on r.customer_id = c.id WHERE r.id = ?`,
 
 	SELECT_ALL_BY_STATUS: `SELECT r.*, u.name as 'user', c.name as 'customer' FROM ${tableName} r inner join ${tableUser} u on r.user_id = u.id inner join ${tableCustomer} c on r.customer_id = c.id WHERE r.status LIKE ? ORDER BY r.created_at DESC LIMIT ? OFFSET ?`,
+
+	SELECT_PAYMENT_HISTORY_BY_RENT_ID: `select rd.user_id, u.name, rd.end_time as time, sum(rd.sub_amount) as sub_amount from rent_detail rd inner join user u on rd.user_id = u.id where rent_id = ? group by end_time, user_id;`,
 
 	SELECT_BY_ID: `SELECT * FROM ${tableName} WHERE id = ? LIMIT 1`,
 
@@ -139,6 +142,35 @@ module.exports = {
 		});
 	},
 
+	addDetailToRent: (rentId, gerobakIdList, userId) => {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const currentTime = sqlDate(Date.now());
+
+				let rentDetail = {
+					rent_id: rentId,
+					start_time: currentTime,
+					created_at: currentTime,
+					user_id: userId,
+				};
+
+				db.beginTransaction();
+				for (let id of gerobakIdList) {
+					await gerobakModel.updateStatus("DISEWA", id);
+					rentDetail.gerobak_id = id;
+					rentDetail.sub_amount = (
+						await gerobakModel.getGerobakCharge(id)
+					).charge;
+					await rentDetailModel.create(rentDetail);
+				}
+				db.commit();
+				resolve(true);
+			} catch (e) {
+				return reject(e);
+			}
+		});
+	},
+
 	setLastPayment: (paymentDateTime, rentId) => {
 		return new Promise((resolve, reject) => {
 			db.query(
@@ -209,8 +241,6 @@ module.exports = {
 
 				for (let gerobakId of unpaidGerobakIdList) {
 					await gerobakModel.updateStatus("ADA", gerobakId);
-					const subAmount = await rentDetailModel.getSubAmount(id, gerobakId);
-					await rentDetailModel.setSubAmount(subAmount, id, gerobakId);
 				}
 
 				const currentDateTime = sqlDate(Date.now());
@@ -268,6 +298,19 @@ module.exports = {
 				console.error(e);
 				return reject(e);
 			}
+		});
+	},
+
+	getPaymentHistory: (rentId) => {
+		return new Promise((resolve, reject) => {
+			db.query(
+				query.SELECT_PAYMENT_HISTORY_BY_RENT_ID,
+				rentId,
+				(err, result) => {
+					if (err) return reject(err);
+					return resolve(result);
+				}
+			);
 		});
 	},
 };
