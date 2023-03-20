@@ -66,7 +66,7 @@ module.exports = {
 	getRent: async (req, res) => {
 		try {
 			let foundRent;
-			if (req.params.get_view === "true") {
+			if (req.query.get_view === "true") {
 				foundRent = await rentModel.getViewById(req.params.id);
 			} else {
 				foundRent = await rentModel.getById(req.params.id);

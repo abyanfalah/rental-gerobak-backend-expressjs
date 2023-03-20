@@ -62,7 +62,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.SELECT_VIEW_BY_RENT_ID, rentId, (err, result) => {
 				if (err) return reject(err);
-				return resolve(result);
+				return resolve(result[0]);
 			});
 		});
 	},

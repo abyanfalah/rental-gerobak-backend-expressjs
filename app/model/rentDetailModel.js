@@ -10,7 +10,7 @@ const query = {
 	// SELECT_ALL: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC LIMIT ? OFFSET ?`,
 	SELECT_BY_RENT_ID: `SELECT * FROM ${tableName} WHERE rent_id = ?`,
 	SELECT_BY_RENT_ID_AND_GEROBAK_ID: `SELECT * FROM ${tableName} WHERE rent_id = ? `,
-	SELECT_BY_RENT_ID_WITH_GEROBAK_DETAILS: `SELECT g.*, rd.* FROM ${tableName} rd inner join gerobak g on rd.gerobak_id = g.id WHERE rent_id = ?`,
+	SELECT_BY_RENT_ID_WITH_GEROBAK_DETAILS: `SELECT g.*, rd.* FROM ${tableName} rd inner join gerobak g on rd.gerobak_id = g.id WHERE rd.rent_id = ?`,
 
 	GET_GEROBAK_LIST_BY_RENT_ID: `SELECT gerobak_id FROM ${tableName} WHERE rent_id = ?`,
 
