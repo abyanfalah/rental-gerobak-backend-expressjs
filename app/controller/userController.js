@@ -2,12 +2,18 @@ const userModel = require("../model/userModel");
 const sha1 = require("sha1");
 const isIdenticalObject = require("../../helper/is-identical-object");
 const path = require("path");
+
 module.exports = {
 	listUser: async (req, res) => {
-		let limit = req.query.rows ?? 10;
-		let offset = limit * ((req.query.page ?? 1) - 1);
+		let data;
 		try {
-			let data = await userModel.getAll(limit, offset);
+			if (req.query.all === "true") {
+				data = await userModel.getAll();
+			} else {
+				let limit = req.query.rows ?? 10;
+				let offset = limit * ((req.query.page ?? 1) - 1);
+				data = await userModel.getAll(limit, offset);
+			}
 			res.send({
 				data,
 				length: data.length,
@@ -49,10 +55,6 @@ module.exports = {
 			} else {
 				delete req.body.profilePic;
 			}
-
-			console.clear();
-			console.log("file", req.file);
-			console.log("body", req.body);
 
 			await userModel.create(req.body);
 			res.send({ message: "user created" });
