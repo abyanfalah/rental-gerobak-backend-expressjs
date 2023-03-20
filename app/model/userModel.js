@@ -6,7 +6,8 @@ const sqlDate = require(`js-date-to-sql-datetime`);
 const tableName = `user`;
 
 const query = {
-	SELECT_ALL: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC LIMIT ? OFFSET ?`,
+	SELECT_ALL: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC`,
+	SELECT_ALL_PAGINATED: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC LIMIT ? OFFSET ?`,
 	SELECT_BY_ID: `SELECT * FROM ${tableName} WHERE id = ? LIMIT 1`,
 	SELECT_BY_CREDENTIALS: `SELECT * FROM ${tableName} WHERE username = ? AND password = ? LIMIT 1`,
 	SELECT_USERNAME: `SELECT username FROM ${tableName} WHERE username = ? LIMIT 1`,
@@ -21,6 +22,19 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(
 				query.SELECT_ALL,
+				[parseInt(limit), parseInt(offset)],
+				(err, result) => {
+					if (err) return reject(err);
+					return resolve(result);
+				}
+			);
+		});
+	},
+
+	getAllPaginated: (limit, offset) => {
+		return new Promise((resolve, reject) => {
+			db.query(
+				query.SELECT_ALL_PAGINATED,
 				[parseInt(limit), parseInt(offset)],
 				(err, result) => {
 					if (err) return reject(err);
