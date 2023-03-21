@@ -122,25 +122,12 @@ module.exports = {
 				return res.status(404).send({ message: "user not found" });
 			}
 
-			if (!foundUser.image) {
-				const filePath = path.join(
-					__dirname,
-					"..",
-					"..",
-					"uploads/images/user_profile_pictures",
-					"default.jpg"
-				);
-
-				res.sendFile(filePath);
-				return;
-			}
-
 			const filePath = path.join(
 				__dirname,
 				"..",
 				"..",
 				"uploads/images/user_profile_pictures",
-				foundUser.image
+				foundUser.image ?? "default.jpg"
 			);
 
 			res.sendFile(filePath);
