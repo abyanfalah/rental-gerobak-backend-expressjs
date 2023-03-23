@@ -9,7 +9,8 @@ const query = {
 	// TODO: remove unneeded sqls
 	// SELECT_ALL: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC LIMIT ? OFFSET ?`,
 	SELECT_BY_RENT_ID: `SELECT * FROM ${tableName} WHERE rent_id = ?`,
-	SELECT_BY_RENT_ID_AND_GEROBAK_ID: `SELECT * FROM ${tableName} WHERE rent_id = ? `,
+	SELECT_BY_RENT_ID_AND_GEROBAK_ID: `SELECT * FROM ${tableName} WHERE rent_id = ? AND gerobak_id = ?`,
+	SELECT_BY_RENT_ID_WITH_GEROBAK_DETAILS: `SELECT g.*, rd.* FROM ${tableName} rd inner join gerobak g on rd.gerobak_id = g.id WHERE rd.rent_id = ?`,
 
 	GET_GEROBAK_LIST_BY_RENT_ID: `SELECT gerobak_id FROM ${tableName} WHERE rent_id = ?`,
 
@@ -23,7 +24,7 @@ const query = {
 	SET_ALL_END_TIME_BY_RENT_ID: `UPDATE ${tableName} SET end_time = ? WHERE rent_id = ?`,
 	SET_END_TIME_BY_RENT_ID_AND_GEROBAK_ID: `UPDATE ${tableName} SET end_time = ? WHERE rent_id = ? AND gerobak_id = ?`,
 
-	SET_SUB_AMOUNT_BY_RENT_ID_AND_GEROBAK_ID: `UPDATE ${tableName} SET sub_amount = ? WHERE rent_id AND gerobak_id = ?`,
+	SET_SUB_AMOUNT_BY_RENT_ID_AND_GEROBAK_ID: `UPDATE ${tableName} SET sub_amount = ? WHERE rent_id = ? AND gerobak_id = ?`,
 
 	INSERT: `INSERT INTO ${tableName} SET ?`,
 	// UPDATE: `UPDATE ${tableName} SET ? WHERE id = ?`,
@@ -53,6 +54,19 @@ module.exports = {
 		});
 	},
 
+	getByRentIdWithGerobakDetails: (id) => {
+		return new Promise((resolve, reject) => {
+			db.query(
+				query.SELECT_BY_RENT_ID_WITH_GEROBAK_DETAILS,
+				id,
+				(err, result) => {
+					if (err) return reject(err);
+					return resolve(result);
+				}
+			);
+		});
+	},
+
 	getByRentIdAndGerobakId: (rentId, gerobakId) => {
 		return new Promise((resolve, reject) => {
 			db.query(
@@ -70,7 +84,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.INSERT, newData, (err) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				return resolve(true);
@@ -83,7 +97,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.UPDATE, [newData, newData.id], (err) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				return resolve(true);
@@ -98,7 +112,7 @@ module.exports = {
 				[{ deleted_at: sqlDate(Date.now()) }, id],
 				(err) => {
 					if (err) {
-						console.log(err);
+						console.error(err);
 						return reject(err);
 					}
 					return resolve(true);
@@ -111,7 +125,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.DELETE, id, (err) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				return resolve(true);
@@ -126,7 +140,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(sql, id, (err, result) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				const gerobakIdList = result.map((rentDetail) => rentDetail.gerobak_id);
@@ -139,7 +153,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.GET_UNPAID_GEROBAK_LIST_BY_RENT_ID, id, (err, result) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				const gerobakIdList = result.map((rentDetail) => rentDetail.gerobak_id);
@@ -155,7 +169,7 @@ module.exports = {
 				[status, rentId],
 				(err) => {
 					if (err) {
-						console.log(err);
+						console.error(err);
 						return reject(err);
 					}
 					return resolve(true);
@@ -171,7 +185,7 @@ module.exports = {
 				[status, rentId, gerobakId],
 				(err) => {
 					if (err) {
-						console.log(err);
+						console.error(err);
 						return reject(err);
 					}
 					return resolve(true);
@@ -184,7 +198,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.SET_ALL_END_TIME_BY_RENT_ID, [endTime, rentId], (err) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				return resolve(true);
@@ -199,7 +213,7 @@ module.exports = {
 				[endTime, rentId, gerobakId],
 				(err) => {
 					if (err) {
-						console.log(err);
+						console.error(err);
 						return reject(err);
 					}
 					return resolve(true);
@@ -215,7 +229,7 @@ module.exports = {
 				[subAmount, rentId, gerobakId],
 				(err) => {
 					if (err) {
-						console.log(err);
+						console.error(err);
 						return reject(err);
 					}
 					return resolve(true);
@@ -224,35 +238,47 @@ module.exports = {
 		});
 	},
 
-	getHoursDiff: (rentId, compareToTime) => {
+	getHoursDiff: (rentId, gerobakId, compareToTime) => {
 		return new Promise((resolve, reject) => {
-			db.query(query.SELECT_BY_RENT_ID, rentId, (err, result) => {
-				if (err) {
-					console.log(err);
-					return reject(err);
+			db.query(
+				query.SELECT_BY_RENT_ID_AND_GEROBAK_ID,
+				[rentId, gerobakId],
+				(err, result) => {
+					if (err) {
+						console.error(err);
+						return reject(err);
+					}
+
+					compareToTime = moment(compareToTime ?? sqlDate(Date.now()));
+					const startTime = moment(result[0].start_time);
+					console.log(result[0].start_time);
+					console.log(compareToTime.diff(startTime, "hours"));
+					return resolve(compareToTime.diff(startTime, "hours"));
 				}
-				compareToTime = moment(compareToTime ?? sqlDate(Date.now()));
-				const startTime = moment(result[0].start_time);
-				return resolve(compareToTime.diff(startTime, "hours"));
-			});
+			);
 		});
 	},
 
 	getSubAmount: async (rentId, gerobakId) => {
 		const { charge, hourBase } = await gerobakModel.getGerobakCharge(gerobakId);
-		let hoursDiff = await module.exports.getHoursDiff(rentId);
+		let hoursDifference = await module.exports.getHoursDiff(rentId, gerobakId);
 
 		let subAmount = charge;
-		hoursDiff -= hourBase;
+		hoursDifference -= hourBase;
 
-		while (hoursDiff > hourBase) {
+		while (hoursDifference > hourBase) {
 			subAmount += charge;
-			hoursDiff -= hourBase;
+			hoursDifference -= hourBase;
 		}
 
-		if (hoursDiff > hourBase / 2) subAmount += charge;
-		else if (hoursDiff > 0) subAmount += (hoursDiff / hourBase) * charge;
+		const halfHourBase = hourBase / 2;
 
-		return Math.floor(subAmount / 1000) * 1000;
+		if (hoursDifference > halfHourBase) subAmount += charge;
+		else if (hoursDifference > 0)
+			subAmount += (hoursDifference / hourBase) * charge;
+
+		const resultSubAmount = Math.floor(subAmount / 1000) * 1000;
+		module.exports.setSubAmount(resultSubAmount, rentId, gerobakId);
+		return resultSubAmount;
 	},
 };

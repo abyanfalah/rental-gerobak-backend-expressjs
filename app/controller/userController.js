@@ -1,21 +1,27 @@
 const userModel = require("../model/userModel");
 const sha1 = require("sha1");
 const isIdenticalObject = require("../../helper/is-identical-object");
+const path = require("path");
 
 module.exports = {
 	listUser: async (req, res) => {
-		let limit = req.query.rows ?? 10;
-		let offset = limit * ((req.query.page ?? 1) - 1);
+		let data;
 		try {
-			let data = await userModel.getAll(limit, offset);
+			if (req.query.all === "true") {
+				data = await userModel.getAll();
+			} else {
+				let limit = req.query.rows ?? 10;
+				let offset = limit * ((req.query.page ?? 1) - 1);
+				data = await userModel.getAll(limit, offset);
+			}
 			res.send({
 				data,
 				length: data.length,
 				page: parseInt(req.query.page),
 			});
 		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+			console.error(e);
+			res.status(500).send(e);
 		}
 	},
 
@@ -23,14 +29,14 @@ module.exports = {
 		try {
 			let foundUser = await userModel.getById(req.params.id);
 			if (!foundUser) {
-				return res.sendStatus(404);
+				return res.status(404).send({ message: "user not found" });
 			}
 			res.send({
 				data: foundUser,
 			});
 		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+			console.error(e);
+			res.status(500).send(e);
 		}
 	},
 
@@ -44,13 +50,17 @@ module.exports = {
 					.status(400)
 					.send({ message: "password should be at least 4 characters long" });
 
-			userModel
-				.create(req.body)
-				.then(() => res.send({ message: "user created" }))
-				.catch((err) => res.send(err));
+			if (req.file) {
+				req.body.image = req.file.filename;
+			} else {
+				delete req.body.profilePic;
+			}
+
+			await userModel.create(req.body);
+			res.send({ message: "user created" });
 		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+			console.error(e);
+			res.status(500).send(e);
 		}
 	},
 
@@ -59,11 +69,13 @@ module.exports = {
 			let userId = req.params.id;
 			let foundUser = await userModel.getById(userId);
 			if (!foundUser) {
-				return res.sendStatus(404);
+				return res.status(404).send({ message: "user not found" });
 			}
 
 			req.body.id = userId;
-			req.body.password = sha1(req.body.password);
+			if (req.body.password) {
+				req.body.password = sha1(req.body.password);
+			}
 
 			if (isIdenticalObject(req.body, foundUser)) {
 				return res
@@ -71,13 +83,11 @@ module.exports = {
 					.send({ message: "same data, no changes were made" });
 			}
 
-			userModel
-				.update(req.body)
-				.then(() => res.send({ message: "user updated" }))
-				.catch((err) => res.send(err));
+			await userModel.update(req.body);
+			res.send({ message: "user updated" });
 		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+			console.error(e);
+			res.status(500).send(e);
 		}
 	},
 
@@ -87,16 +97,43 @@ module.exports = {
 				return res.status(400).send({ message: "cannot delete self account" });
 
 			let foundUser = await userModel.getById(req.params.id);
-			if (!foundUser) {
-				return res.sendStatus(404);
+			if (!foundUser /* || foundUser.deleted_at */) {
+				return res.status(404).send({ message: "user not found" });
 			}
-			userModel
-				.delete(foundUser.id)
-				.then(() => res.send({ message: "user deleted" }))
-				.catch((err) => res.send(err));
+
+			if (foundUser.deleted_at) {
+				return res.status(400).send({
+					message: "user is deleted already, contact admin to recover account",
+				});
+			}
+
+			await userModel.delete(foundUser.id);
+			res.send({ message: "user deleted" });
 		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+			console.error(e);
+			res.status(500).send(e);
+		}
+	},
+
+	getUserImage: async (req, res) => {
+		try {
+			let foundUser = await userModel.getById(req.params.id);
+			if (!foundUser) {
+				return res.status(404).send({ message: "user not found" });
+			}
+
+			const filePath = path.join(
+				__dirname,
+				"..",
+				"..",
+				"uploads/images/user_profile_pictures",
+				foundUser.image ?? "default.jpg"
+			);
+
+			res.sendFile(filePath);
+		} catch (e) {
+			console.error(e);
+			res.status(500).send(e);
 		}
 	},
 };

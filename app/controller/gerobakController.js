@@ -8,17 +8,22 @@ module.exports = {
 		let offset = limit * ((req.query.page ?? 1) - 1);
 
 		try {
-			let data = await gerobakModel.getAllNoPagination();
+			let data;
+			if (req.query.get_view === "true") {
+				data = await gerobakModel.getView();
+			} else {
+				data = await gerobakModel.getAllNoPagination();
+			}
 			// let data = await gerobakModel.getAll(limit, offset);
 
 			res.send({
 				data,
-				// length: data.length,
-				// page: parseInt(req.query.page),
+				length: data.length,
+				page: parseInt(req.query.page),
 			});
 		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+			console.error(e);
+			res.status(500).send(e);
 		}
 	},
 
@@ -26,14 +31,14 @@ module.exports = {
 		try {
 			let foundGerobak = await gerobakModel.getById(req.params.id);
 			if (!foundGerobak) {
-				return res.sendStatus(404);
+				return res.status(404).send("gerobak not found");
 			}
 			res.send({
 				data: foundGerobak,
 			});
 		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+			console.error(e);
+			res.status(500).send(e);
 		}
 	},
 
@@ -43,13 +48,11 @@ module.exports = {
 			if (!foundGerobakType || foundGerobakType.deleted_at != null)
 				return res.status(400).send({ message: "invalid gerobak type" });
 
-			gerobakModel
-				.create(req.body)
-				.then(() => res.send({ message: "gerobak created" }))
-				.catch((err) => res.status(500).send(err));
+			await gerobakModel.create(req.body);
+			res.send({ message: "gerobak created" });
 		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+			console.error(e);
+			res.status(500).send(err);
 		}
 	},
 
@@ -58,7 +61,7 @@ module.exports = {
 			let GerobakId = await req.params.id;
 			let foundGerobak = await gerobakModel.getById(GerobakId);
 			if (!foundGerobak) {
-				return res.sendStatus(404);
+				return res.status(404).send("gerobak not found");
 			}
 
 			req.body.id = GerobakId;
@@ -69,13 +72,11 @@ module.exports = {
 
 			req.body.code = await gerobakTypeModel.getNextCode(req.body.type_id);
 
-			gerobakModel
-				.update(req.body)
-				.then(() => res.send({ message: "gerobak updated" }))
-				.catch((err) => res.status(501).send(err));
+			await gerobakModel.update(req.body);
+			res.send({ message: "gerobak updated" });
 		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+			console.error(e);
+			res.status(500).send(e);
 		}
 	},
 
@@ -83,15 +84,21 @@ module.exports = {
 		try {
 			let foundGerobak = await gerobakModel.getById(req.params.id);
 			if (!foundGerobak) {
-				return res.sendStatus(404);
+				return res.status(404).send("gerobak not found");
 			}
-			gerobakModel
-				.delete(foundGerobak.id)
-				.then(() => res.send({ message: "gerobak deleted" }))
-				.catch((err) => res.send(err));
+
+			if (foundGerobak.deleted_at) {
+				return res.status(400).send({
+					message:
+						"gerobak is deleted already, contact admin to recover account",
+				});
+			}
+
+			await gerobakModel.delete(foundGerobak.id);
+			res.send({ message: "gerobak deleted" });
 		} catch (e) {
-			console.log(e);
-			res.sendStatus(500);
+			console.error(e);
+			res.status(500).send(e);
 		}
 	},
 };

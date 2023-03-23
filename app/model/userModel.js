@@ -6,7 +6,8 @@ const sqlDate = require(`js-date-to-sql-datetime`);
 const tableName = `user`;
 
 const query = {
-	SELECT_ALL: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC LIMIT ? OFFSET ?`,
+	SELECT_ALL: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC`,
+	SELECT_ALL_PAGINATED: `SELECT * FROM ${tableName} WHERE deleted_at IS null ORDER BY created_at ASC LIMIT ? OFFSET ?`,
 	SELECT_BY_ID: `SELECT * FROM ${tableName} WHERE id = ? LIMIT 1`,
 	SELECT_BY_CREDENTIALS: `SELECT * FROM ${tableName} WHERE username = ? AND password = ? LIMIT 1`,
 	SELECT_USERNAME: `SELECT username FROM ${tableName} WHERE username = ? LIMIT 1`,
@@ -30,6 +31,19 @@ module.exports = {
 		});
 	},
 
+	getAllPaginated: (limit, offset) => {
+		return new Promise((resolve, reject) => {
+			db.query(
+				query.SELECT_ALL_PAGINATED,
+				[parseInt(limit), parseInt(offset)],
+				(err, result) => {
+					if (err) return reject(err);
+					return resolve(result);
+				}
+			);
+		});
+	},
+
 	getById: (id) => {
 		return new Promise((resolve, reject) => {
 			db.query(query.SELECT_BY_ID, id, (err, result) => {
@@ -40,13 +54,14 @@ module.exports = {
 	},
 
 	create: (newData) => {
-		newData.id = uuid.v4();
+		newData.id = newData.id ?? uuid.v4();
 		newData.password = sha1(newData.password);
+		newData.access = newData.access ?? "user";
 
 		return new Promise((resolve, reject) => {
 			db.query(query.INSERT, newData, (err) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				return resolve(true);
@@ -56,11 +71,12 @@ module.exports = {
 
 	update: (newData) => {
 		newData.updated_at = sqlDate(Date.now());
+		newData.access = newData.access ?? "user";
 
 		return new Promise((resolve, reject) => {
 			db.query(query.UPDATE, [newData, newData.id], (err) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				return resolve(true);
@@ -75,7 +91,7 @@ module.exports = {
 				[{ deleted_at: sqlDate(Date.now()) }, id],
 				(err) => {
 					if (err) {
-						console.log(err);
+						console.error(err);
 						return reject(err);
 					}
 					return resolve(true);
@@ -88,7 +104,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(query.DELETE, id, (err) => {
 				if (err) {
-					console.log(err);
+					console.error(err);
 					return reject(err);
 				}
 				return resolve(true);
@@ -103,7 +119,7 @@ module.exports = {
 				[credentials.username, sha1(credentials.password)],
 				(err, result) => {
 					if (err) {
-						console.log(err);
+						console.error(err);
 						return reject(err);
 					}
 					return resolve(result[0]);

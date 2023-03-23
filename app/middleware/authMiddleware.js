@@ -3,7 +3,7 @@ module.exports = {
 		if (req.session.user) {
 			const message = "only guest can access";
 			console.log(message);
-			return res.sendStatus(403);
+			return res.status(403).send(message);
 		}
 		next();
 	},
@@ -12,20 +12,22 @@ module.exports = {
 		if (!req.session.user) {
 			const message = "should login to access";
 			console.log(message);
-			return res.sendStatus(401);
+			return res.status(401).send(message);
 		}
 		next();
 	},
 
 	isAdmin: (req, res, next) => {
+		let message;
 		if (!req.session.user) {
-			console.log("only admin can access");
-			return res.sendStatus(401);
+			message = "only admin can access";
+			console.log(message);
+			return res.status(401).send(message);
 		}
 
 		if (req.session.user.access !== "admin") {
-			console.log("only admin can access");
-			return res.sendStatus(403);
+			console.log(message);
+			return res.status(403).send(message);
 		}
 		next();
 	},
@@ -39,7 +41,8 @@ module.exports = {
 			return next();
 		}
 
-		console.log("only admin or guest can access");
-		return res.sendStatus(403);
+		const message = "only admin or guest can access";
+		console.log(message);
+		return res.status(403).send(message);
 	},
 };

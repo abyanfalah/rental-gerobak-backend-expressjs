@@ -12,6 +12,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+// app.use(
+// 	express.static(
+// 		"/images",
+// 		path.join(__dirname, "uploads/images/user_profile_pictures/")
+// 	)
+// );
 
 app.disable("x-powered-by");
 app.use(
@@ -26,9 +32,10 @@ app.use(
 	session({
 		secret: "secret",
 		resave: false,
+		rolling: true,
 		saveUninitialized: false,
 		cookie: {
-			maxAge: 1000 * 60 * 60,
+			maxAge: 1000 * 60 * 30,
 			// secure: true,
 		},
 		unset: "destroy",
