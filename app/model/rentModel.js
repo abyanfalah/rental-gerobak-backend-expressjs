@@ -10,8 +10,10 @@ const tableCustomer = "customer";
 const rentDetail = "rent_detail";
 
 const query = {
-	SELECT_ALL: `SELECT * FROM ${tableName} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
-	SELECT_VIEW: `SELECT r.*, u.name as 'user', c.name as 'customer' FROM ${tableName} r inner join ${tableUser} u on r.user_id = u.id inner join ${tableCustomer} c on r.customer_id = c.id ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+	// SELECT_ALL: `SELECT * FROM ${tableName} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+	SELECT_ALL: `SELECT * FROM ${tableName} ORDER BY created_at DESC`,
+	// SELECT_VIEW: `SELECT r.*, u.name as 'user', c.name as 'customer' FROM ${tableName} r inner join ${tableUser} u on r.user_id = u.id inner join ${tableCustomer} c on r.customer_id = c.id ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+	SELECT_VIEW: `SELECT r.*, u.name as 'user', c.name as 'customer' FROM ${tableName} r inner join ${tableUser} u on r.user_id = u.id inner join ${tableCustomer} c on r.customer_id = c.id ORDER BY created_at DESC`,
 
 	SELECT_TODAY_RENT_VIEW: `SELECT r.*, u.name as 'user', c.name as 'customer' FROM ${tableName} r inner join ${tableUser} u on r.user_id = u.id inner join ${tableCustomer} c on r.customer_id = c.id WHERE date(r.created_at) = CURRENT_DATE() ORDER BY created_at DESC`,
 
@@ -34,7 +36,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(
 				query.SELECT_ALL,
-				[parseInt(limit), parseInt(offset)],
+				// [parseInt(limit), parseInt(offset)],
 				(err, result) => {
 					if (err) return reject(err);
 					return resolve(result);
@@ -49,7 +51,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			db.query(
 				query.SELECT_VIEW,
-				[parseInt(limit), parseInt(offset)],
+				// [parseInt(limit), parseInt(offset)],
 				(err, result) => {
 					if (err) return reject(err);
 					return resolve(result);
