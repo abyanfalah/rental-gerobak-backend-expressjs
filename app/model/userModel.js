@@ -71,7 +71,6 @@ module.exports = {
 
 	update: (newData) => {
 		newData.updated_at = sqlDate(Date.now());
-		newData.access = newData.access ?? "user";
 
 		return new Promise((resolve, reject) => {
 			db.query(query.UPDATE, [newData, newData.id], (err) => {
