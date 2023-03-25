@@ -40,6 +40,20 @@ module.exports = {
 		}
 	},
 
+	checkUsername: async (req, res) => {
+		try {
+			const usernameToCheck = req.query.username;
+			const isAvailableUsername = await userModel.isAvailableUsername(
+				usernameToCheck
+			);
+
+			return res.send(isAvailableUsername);
+		} catch (e) {
+			console.error(e);
+			res.status(500).send(e);
+		}
+	},
+
 	createUser: async (req, res) => {
 		try {
 			if (!(await userModel.isAvailableUsername(req.body.username)))
