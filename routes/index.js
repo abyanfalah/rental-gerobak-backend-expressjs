@@ -4,6 +4,7 @@ const rentDetailModel = require("../app/model/rentDetailModel");
 const rentModel = require("../app/model/rentModel");
 const router = express.Router();
 const upload = require("../app/middleware/fileUploadMiddleware");
+const { isLogin } = require("../app/middleware/authMiddleware");
 
 // TODO: delete unnecessary imports
 router.get("/", (req, res) => {
@@ -12,7 +13,7 @@ router.get("/", (req, res) => {
 
 router.get("/test", async (req, res) => {});
 
-router.get("/session", (req, res) => {
+router.get("/session", isLogin, (req, res) => {
 	res.send(req.session);
 });
 
