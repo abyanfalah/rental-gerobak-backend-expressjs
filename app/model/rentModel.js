@@ -126,17 +126,32 @@ module.exports = {
 					user_id: rentData.user_id,
 				};
 
-				db.beginTransaction();
-				db.query(query.INSERT, rentData);
-				for (let id of rentedGerobakIdList) {
-					await gerobakModel.updateStatus("DISEWA", id);
-					rentDetail.gerobak_id = id;
-					rentDetail.sub_amount = (
-						await gerobakModel.getGerobakCharge(id)
-					).charge;
-					await rentDetailModel.create(rentDetail);
-				}
-				db.commit();
+				db.beginTransaction((err) => {
+					if (err) throw err;
+
+					db.query(query.INSERT, rentData, async (err) => {
+						if (err)
+							db.rollback(() => {
+								throw err;
+							});
+
+						for (let id of rentedGerobakIdList) {
+							await gerobakModel.updateStatus("DISEWA", id);
+							rentDetail.gerobak_id = id;
+							rentDetail.sub_amount = (
+								await gerobakModel.getGerobakCharge(id)
+							).charge;
+							await rentDetailModel.create(rentDetail);
+						}
+
+						db.commit((err) => {
+							if (err)
+								db.rollback(() => {
+									throw err;
+								});
+						});
+					});
+				});
 				resolve(true);
 			} catch (e) {
 				return reject(e);
@@ -156,16 +171,23 @@ module.exports = {
 					user_id: userId,
 				};
 
-				db.beginTransaction();
-				for (let id of gerobakIdList) {
-					await gerobakModel.updateStatus("DISEWA", id);
-					rentDetail.gerobak_id = id;
-					rentDetail.sub_amount = (
-						await gerobakModel.getGerobakCharge(id)
-					).charge;
-					await rentDetailModel.create(rentDetail);
-				}
-				db.commit();
+				db.beginTransaction(async (err) => {
+					if (err) throw err;
+					for (let id of gerobakIdList) {
+						await gerobakModel.updateStatus("DISEWA", id);
+						rentDetail.gerobak_id = id;
+						rentDetail.sub_amount = (
+							await gerobakModel.getGerobakCharge(id)
+						).charge;
+						await rentDetailModel.create(rentDetail);
+					}
+
+					db.commit((err) =>
+						db.rollback(() => {
+							throw err;
+						})
+					);
+				});
 				resolve(true);
 			} catch (e) {
 				return reject(e);
@@ -239,20 +261,33 @@ module.exports = {
 				const unpaidGerobakIdList =
 					await rentDetailModel.getUnpaidGerobakListByRentId(id);
 
-				db.beginTransaction();
-
-				for (let gerobakId of unpaidGerobakIdList) {
-					await gerobakModel.updateStatus("ADA", gerobakId);
-				}
-
 				const currentDateTime = sqlDate(Date.now());
 
-				await rentDetailModel.updateAllDetailStatus("OK", id);
-				await rentDetailModel.setAllEndTime(currentDateTime, id);
-				await module.exports.setLastPayment(currentDateTime, id);
+				db.beginTransaction(async (err) => {
+					if (err) throw err;
 
-				db.query(query.UPDATE, [{ status: "OK" }, id]);
-				db.commit();
+					for (let gerobakId of unpaidGerobakIdList) {
+						await gerobakModel.updateStatus("ADA", gerobakId);
+					}
+
+					await rentDetailModel.updateAllDetailStatus("OK", id);
+					await rentDetailModel.setAllEndTime(currentDateTime, id);
+					await module.exports.setLastPayment(currentDateTime, id);
+
+					db.query(query.UPDATE, [{ status: "OK" }, id], (err) => {
+						if (err)
+							db.rollback(() => {
+								throw err;
+							});
+
+						db.commit((err) => {
+							if (err)
+								db.rollback(() => {
+									throw err;
+								});
+						});
+					});
+				});
 
 				return resolve();
 			} catch (e) {
@@ -266,17 +301,28 @@ module.exports = {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const currentDateTime = sqlDate(Date.now());
-				db.beginTransaction();
-				for (let gerobakId of gerobakIdList) {
-					await gerobakModel.updateStatus("ADA", gerobakId);
-					await rentDetailModel.updateDetailStatus("OK", id, gerobakId);
-					await rentDetailModel.setEndTime(currentDateTime, id, gerobakId);
+				db.beginTransaction(async (err) => {
+					if (err) throw err;
 
-					const subAmount = await getRentDetailSubAmount(id, gerobakId);
-					await rentDetailModel.setSubAmount(subAmount, id, gerobakId);
-				}
+					for (let gerobakId of gerobakIdList) {
+						await gerobakModel.updateStatus("ADA", gerobakId);
+						await rentDetailModel.updateDetailStatus("OK", id, gerobakId);
+						await rentDetailModel.setEndTime(currentDateTime, id, gerobakId);
 
-				await module.exports.setLastPayment(currentDateTime, id);
+						const subAmount = await getRentDetailSubAmount(id, gerobakId);
+						await rentDetailModel.setSubAmount(subAmount, id, gerobakId);
+					}
+
+					await module.exports.setLastPayment(currentDateTime, id);
+
+					db.commit((err) => {
+						if (err)
+							db.rollback(() => {
+								throw err;
+							});
+					});
+				});
+
 				return resolve();
 			} catch (e) {
 				console.error(e);

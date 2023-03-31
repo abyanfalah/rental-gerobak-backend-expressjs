@@ -84,10 +84,26 @@ module.exports = {
 				newData.id = uuid.v4();
 				newData.code = await gerobakTypeModel.getNextCode(newData.type_id);
 
-				db.beginTransaction();
-				db.query(query.INSERT, newData);
-				gerobakTypeModel.incrementCount(newData.type_id);
-				db.commit();
+				db.beginTransaction((err) => {
+					if (err) throw err;
+					db.query(query.INSERT, newData, async (err) => {
+						if (err)
+							db.rollback(() => {
+								throw err;
+							});
+
+						await gerobakTypeModel.incrementCount(newData.type_id);
+
+						db.commit((err) => {
+							if (err)
+								db.rollback(() => {
+									throw err;
+								});
+
+							console.log("create gerobak tx success");
+						});
+					});
+				});
 				return resolve();
 			} catch (e) {
 				return reject(e);
@@ -98,10 +114,27 @@ module.exports = {
 	update: (newData) => {
 		return new Promise((resolve, reject) => {
 			try {
-				db.beginTransaction();
-				db.query(query.UPDATE, [newData, newData.id]);
-				gerobakTypeModel.incrementCount(newData.type_id);
-				db.commit();
+				db.beginTransaction((err) => {
+					if (err) throw err;
+
+					db.query(query.UPDATE, [newData, newData.id], async (err) => {
+						if (err)
+							db.rollback(() => {
+								throw err;
+							});
+
+						await gerobakTypeModel.incrementCount(newData.type_id);
+
+						db.commit((err) => {
+							if (err)
+								db.rollback(() => {
+									throw err;
+								});
+
+							console.log("update gerobak tx success");
+						});
+					});
+				});
 				return resolve();
 			} catch (e) {
 				return reject(e);
