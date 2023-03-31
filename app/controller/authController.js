@@ -1,4 +1,5 @@
 const userModel = require("../model/userModel");
+const setUserSession = require("../../helper/set-user-session");
 
 module.exports = {
 	login: async (req, res) => {
@@ -12,9 +13,8 @@ module.exports = {
 		if (!foundUser)
 			return res.status(400).send({ message: "invalid credentials" });
 
-		delete foundUser.password;
-		// delete foundUser.username;
-		req.session.user = foundUser;
+		// set session data
+		setUserSession(req, foundUser);
 
 		res.send({
 			message: `logged in as ${foundUser.name}`,
