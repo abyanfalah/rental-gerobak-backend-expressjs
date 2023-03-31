@@ -251,8 +251,6 @@ module.exports = {
 
 					compareToTime = moment(compareToTime ?? sqlDate(Date.now()));
 					const startTime = moment(result[0].start_time);
-					console.log(result[0].start_time);
-					console.log(compareToTime.diff(startTime, "hours"));
 					return resolve(compareToTime.diff(startTime, "hours"));
 				}
 			);
