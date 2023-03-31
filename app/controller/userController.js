@@ -2,6 +2,7 @@ const userModel = require("../model/userModel");
 const sha1 = require("sha1");
 const isIdenticalObject = require("../../helper/is-identical-object");
 const path = require("path");
+const setUserSession = require("../../helper/set-user-session");
 
 module.exports = {
 	listUser: async (req, res) => {
@@ -86,9 +87,17 @@ module.exports = {
 				return res.status(404).send({ message: "user not found" });
 			}
 
-			req.body.id = userId;
-			if (req.body.password) {
-				req.body.password = sha1(req.body.password);
+			delete req.body.created_at;
+			delete req.body.deleted_at;
+
+			// if is admin, and trying to change password...
+			if (req.session.user.access == "admin") {
+				if (req.body.password) {
+					req.body.password = sha1(req.body.password);
+				}
+				// if not admin, prevent changing (its own) user access
+			} else {
+				delete req.body.access;
 			}
 
 			if (isIdenticalObject(req.body, foundUser)) {
@@ -98,7 +107,35 @@ module.exports = {
 			}
 
 			await userModel.update(req.body);
-			res.send({ message: "user updated" });
+			const newUserData = await userModel.getById(userId);
+			setUserSession(req, newUserData);
+			res.status(200).send({ message: "user updated" });
+		} catch (e) {
+			console.error(e);
+			res.status(500).send(e);
+		}
+	},
+
+	updateUserPassword: async (req, res) => {
+		try {
+			const userId = req.session.user.id;
+			let foundUser = await userModel.getById(userId);
+			if (!foundUser) {
+				return res.status(404).send({ message: "user not found" });
+			}
+
+			const newPassword = sha1(req.body.newPassword);
+			const newPasswordConfirmation = sha1(req.body.newPasswordConfirmation);
+
+			if (newPassword !== newPasswordConfirmation)
+				return res.status(400).send({
+					message: "password confirmation does not match your new password!",
+				});
+
+			let data = { id: userId, password: newPassword };
+
+			await userModel.update(data);
+			res.send({ message: "user password updated" });
 		} catch (e) {
 			console.error(e);
 			res.status(500).send(e);
