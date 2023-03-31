@@ -4,11 +4,13 @@ const upload = require("../app/middleware/fileUploadMiddleware");
 const {
 	isAdmin,
 	isNotRegularUser,
+	isLogin,
 } = require("../app/middleware/authMiddleware");
 
 const router = express.Router();
 
 router.get("/", userController.listUser);
+router.get("/check_username", isLogin, userController.checkUsername);
 router.get("/:id/image", userController.getUserImage);
 router.get("/:id", userController.getUser);
 
@@ -19,7 +21,8 @@ router.post(
 	userController.createUser
 );
 
-router.put("/:id", isAdmin, userController.updateUser);
+router.put("/update_password", isLogin, userController.updateUserPassword);
+router.put("/:id", isLogin, userController.updateUser);
 router.delete("/:id", isAdmin, userController.deleteUser);
 
 module.exports = router;
